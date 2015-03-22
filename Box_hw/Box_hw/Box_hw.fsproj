@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xsi:noNamespaceSchemaLocation="Project.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Version current="1"/>
+	<Format>Project</Format>
+	<Header>
+		<Program name="TopoR" version="6.0"/>
+		<GUID>{0A35557B-0232-4DDE-A2A3-546CFEFC5C3F}</GUID>
+		<Annotation>Project file</Annotation>
+	</Header>
+	<Document>
+		<LocalLibrary />
+		<Pcb>
+			<File path=".\Box_hw.fsx" Folder="-1" isopened="1"/>
+		</Pcb>
+		<Import>
+			<Specctra>
+			<Path name="D:\Nute\MagicThings\Salem\Box_hw\Box_hw.dsn"/>
+			</Specctra>
+		</Import>
+		<ARouteSessions>
+		</ARouteSessions>
+	</Document>
+</Project>

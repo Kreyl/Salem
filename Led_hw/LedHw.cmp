@@ -1,0 +1,45 @@
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 15/11/2014 14:53:07
+
+BeginCmp
+TimeStamp = /545F7BB0;
+Reference = C1;
+ValeurCmp = 0.1u;
+IdModule  = CAP_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /545F7A39;
+Reference = DA1;
+ValeurCmp = LM317_SO8;
+IdModule  = SO8E;
+EndCmp
+
+BeginCmp
+TimeStamp = /545F7C8F;
+Reference = R1;
+ValeurCmp = 100R;
+IdModule  = RES_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /545F7B44;
+Reference = R2;
+ValeurCmp = 62.5R;
+IdModule  = RES_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /545F79DC;
+Reference = XL1;
+ValeurCmp = CONN_2;
+IdModule  = SPRING_TERM_XY124V_A_2;
+EndCmp
+
+BeginCmp
+TimeStamp = /545F79EE;
+Reference = XL2;
+ValeurCmp = CONN_2;
+IdModule  = CONN_PLS-2;
+EndCmp
+
+EndListe
