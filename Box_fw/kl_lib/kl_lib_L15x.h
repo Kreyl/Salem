@@ -564,7 +564,7 @@ public:
 
 #define FLASH_WAIT_TIMEOUT  36000
 class Flash_t {
-protected:
+public:
     static uint8_t GetStatus() {
         if(FLASH->SR & FLASH_SR_BSY) return BUSY;
         else if(FLASH->SR & FLASH_SR_WRPERR) return WRITE_PROTECT;

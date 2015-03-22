@@ -14,3 +14,11 @@ Led_hw/LedHw.kicad_pcb-bak
 Led_hw/Salem_Led/LedHw.ses
 Box_hw/Box_hw.dsn
 Box_hw/Box_hw/Box_hw.ses
+Box_fw/.settings/language.settings.xml
+Box_fw/Debug/SalemBox.elf
+Box_fw/Debug/SalemBox.lst
+Box_fw/Debug/SalemBox.map
+Box_fw/Debug/kl_lib/SimpleSensors.o
+Box_fw/Debug/kl_lib/keys.o
+Box_fw/Debug/kl_lib/kl_lib_L15x.o
+Box_fw/Debug/main.o

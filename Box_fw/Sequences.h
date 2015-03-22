@@ -231,6 +231,14 @@ const LedSmoothChunk_t lsqFadeOut[] = {
         {csSetup, 630, 0},
         {csEnd}
 };
+const LedSmoothChunk_t lsqEnterActive[] = {
+        {csSetup, 0, LED_TOP_BRIGHTNESS},
+        {csEnd}
+};
+const LedSmoothChunk_t lsqEnterIdle[] = {
+        {csSetup, 3600, 0},
+        {csEnd}
+};
 
 #endif
 

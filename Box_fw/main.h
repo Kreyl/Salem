@@ -15,13 +15,28 @@
 #include "evt_mask.h"
 #include "uart.h"
 
-enum BoxState_t {bsIdle, bsActive};
+struct Settings_t {
+    uint32_t DurationActive_s;
+    uint32_t ID;
+};
+#define EE_ADDR     0
+#define EE_PTR      ((Settings_t*)(EEPROM_BASE_ADDR + EE_ADDR))
+
+#define DURATION_ACTIVE_MIN     10
+#define DURATION_ACTIVE_MAX     9990
+#define DURATION_ACTIVE_DEFAULT 300
 
 class App_t {
 private:
-    BoxState_t State;
+    VirtualTimer ISavingTmr;
+    void EnterIdleState();
+    void EnterActiveState();
+    void ISaveSettings();    // Really save settings
 public:
     Thread *PThread;
+    Settings_t Settings;
+    void LoadSettings();
+    void SaveSettings();    // Prepare to save settings
     void SignalEvt(eventmask_t Evt) {
         chSysLock();
         chEvtSignalI(PThread, Evt);
@@ -29,7 +44,7 @@ public:
     }
     // Inner use
     void ITask();
-    App_t(): State(bsIdle), PThread(nullptr) {}
+//    App_t(): State(bsIdle), PThread(nullptr) {}
 };
 
 extern App_t App;
