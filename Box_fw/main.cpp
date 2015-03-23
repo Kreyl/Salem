@@ -6,9 +6,9 @@
  * Created on Mar 22, 2015, 01:23
  */
 
+#include <buttons.h>
 #include "main.h"
 #include "SimpleSensors.h"
-#include "keys.h"
 #include "interface.h"
 #include "beeper.h"
 #include "Sequences.h"
@@ -45,11 +45,10 @@ int main(void) {
 
     Lcd.Init();
     Lcd.Backlight(50);
-//    Lcd.Printf(1,1,"Aiya Feanaro!");
     App.LoadSettings();
     Interface.Reset();
 
-    Sensors.Init();
+    PinSensors.Init();
     Beeper.Init();
     Beeper.StartSequence(bsqBeepBeep);
 
@@ -63,8 +62,8 @@ __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-#if 1 // ==== Keys ====
-        if(EvtMsk & EVTMSK_KEYS) {
+#if 0 // ==== Keys ====
+        if(EvtMsk & EVTMSK_BUTTONS) {
             KeyEvtInfo_t EInfo;
             while(Keys.EvtBuf.Get(&EInfo) == OK) {
 //                Uart.Printf("\rEinfo: %u, %u, %u", EInfo.Type, EInfo.KeysCnt, EInfo.KeyID[0]);
@@ -157,3 +156,4 @@ void App_t::ISaveSettings() {
     if(r == OK) Uart.Printf("\rSettings saved");
     else Uart.Printf("\rSettings saving failure");
 }
+

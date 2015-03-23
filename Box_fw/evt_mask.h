@@ -11,7 +11,7 @@
 // Event masks
 #define EVTMSK_NO_MASK          0
 
-#define EVTMSK_KEYS             EVENT_MASK(1)
+#define EVTMSK_BUTTONS          EVENT_MASK(1)
 #define EVTMSK_MSNS_ON          EVENT_MASK(2)
 #define EVTMSK_MSNS_OFF         EVENT_MASK(3)
 

@@ -20,17 +20,20 @@
 #elif defined STM32L1XX_MD || defined STM32L1XX_HD
 #include "kl_lib_L15x.h"
 #endif
-#include "SnsPins.h"
+#include <PinSnsSettings.h>
 
-class Sensors_t {
+enum PinSnsState_t {pssLo, pssHi, pssRising, pssFalling};
+
+class SimpleSensors_t {
 private:
+    PinSnsState_t States[PIN_SNS_CNT];
 public:
     void Init();
-    void Shutdown() { for(uint8_t i=0; i<SNSGROUP_CNT; i++) SnsGroups[i]->Off(); }
+    void Shutdown() { for(uint32_t i=0; i<PIN_SNS_CNT; i++) PinSns[i].Off(); }
     // Inner use
     void ITask();
 };
 
-extern Sensors_t Sensors;
+extern SimpleSensors_t PinSensors;
 
 #endif /* KL_LIB_SIMPLESENSORS_H_ */

@@ -5,18 +5,32 @@
  *      Author: kreyl
  */
 
-#include "keys.h"
+#include <buttons.h>
 #include "ch.h"
 #include "evt_mask.h"
 #include "SimpleSensors.h"
+#include "uart.h"
 
-Keys_t Keys;
+Btns_t Btns;
 
-void ProcessKeyState(void *p) {
-    SnsGroup_t *grp = (SnsGroup_t*)p;
-    Keys.ProcessKeysState(grp->WasHi);
+// ==== Inner use ====
+#if BTN_LONGPRESS
+//static bool IsRepeating[BUTTONS_CNT], IsLongPress[BUTTONS_CNT];
+#endif
+//static systime_t RepeatTimer, LongPressTimer;
+#if BTN_COMBO
+    bool IsCombo;
+#endif
+//static void AddEvtToQueue(BtnEvtInfo_t Evt);
+//static void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx);
+
+// ==== Postprocessor for PinSns ====
+void ProcessButtons(void *p, uint32_t Len) {
+    PinSnsState_t *State = (PinSnsState_t*)p;
+//    Uart.Printf("\r%A", p, Len, ' ');
 }
 
+/*
 
 void Keys_t::ProcessKeysState(bool *PCurrentState) {
 //    Uart.Printf("\r%A", PCurrentState, KEYS_CNT, ' ');
@@ -123,3 +137,4 @@ void Keys_t::AddEvtToQueue(KeyEvt_t AType, uint8_t KeyIndx) {
     chEvtSignalI(App.PThread, EVTMSK_KEYS);
     chSysUnlock();
 }
+*/

@@ -53,6 +53,7 @@ enum RiseFall_t {Rising, Falling};
 
 typedef void (*ftVoidVoid)(void);
 typedef void (*ftVoidPVoid)(void*p);
+typedef void (*ftVoidPVoidLen)(void*p, uint32_t Len);
 
 // Simple pseudofunctions
 // Simple pseudofunctions

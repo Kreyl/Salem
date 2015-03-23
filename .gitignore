@@ -22,3 +22,11 @@ Box_fw/Debug/kl_lib/SimpleSensors.o
 Box_fw/Debug/kl_lib/keys.o
 Box_fw/Debug/kl_lib/kl_lib_L15x.o
 Box_fw/Debug/main.o
+Box_fw/Debug/kl_lib/SimpleSensors.d
+Box_fw/Debug/kl_lib/buttons.d
+Box_fw/Debug/kl_lib/buttons.o
+Box_fw/Debug/kl_lib/subdir.mk
+Box_fw/Debug/kl_lib/uart.o
+Box_fw/Debug/lcd1200.d
+Box_fw/Debug/lcd1200.o
+Box_fw/Debug/main.d

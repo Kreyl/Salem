@@ -7,28 +7,55 @@
 
 #include "SimpleSensors.h"
 
-Sensors_t Sensors;
+SimpleSensors_t PinSensors;
 
 // ==== Sensors Thread ====
-static WORKING_AREA(waSensorsThread, 128);
+static WORKING_AREA(waPinSnsThread, 128);
 __attribute__((noreturn))
 static void SensorsThread(void *arg) {
-    chRegSetThreadName("Sensors");
-    Sensors.ITask();
+    chRegSetThreadName("PinSensors");
+    PinSensors.ITask();
 }
 
-void Sensors_t::Init() {
+void SimpleSensors_t::Init() {
     // Init pins
-    for(uint32_t i=0; i < SNSGROUP_CNT; i++) SnsGroups[i]->Init();
+    for(uint32_t i=0; i < PIN_SNS_CNT; i++) {
+        PinSns[i].Init();
+        States[i] = pssLo;
+    }
     // Create and start thread
-    chThdCreateStatic(waSensorsThread, sizeof(waSensorsThread), LOWPRIO, (tfunc_t)SensorsThread, NULL);
+    chThdCreateStatic(waPinSnsThread, sizeof(waPinSnsThread), LOWPRIO, (tfunc_t)SensorsThread, NULL);
 }
 
 __attribute__((noreturn))
-void Sensors_t::ITask() {
+void SimpleSensors_t::ITask() {
     while(true) {
         chThdSleepMilliseconds(SNS_POLL_PERIOD_MS);
-        // Iterate groups checking edge
-        for(uint32_t i=0; i < SNSGROUP_CNT; i++) SnsGroups[i]->Check();
+        ftVoidPVoidLen PostProcessor = PinSns[0].Postprocessor;
+        uint32_t GroupLen = 0;
+        void *Ptr = &States[0];
+        // ==== Iterate pins ====
+        uint32_t i=0;
+        while(i < PIN_SNS_CNT) {
+            // Check pin
+            if(PinSns[i].IsHi()) {
+                if(States[i] == pssLo) States[i] = pssRising;
+                else States[i] = pssHi;
+            }
+            else { // is low
+                if(States[i] == pssHi) States[i] = pssFalling;
+                else States[i] = pssLo;
+            }
+            GroupLen++;
+            // Call postprocessor if this was last pin in group (or last at all)
+            i++;
+            if((i >= PIN_SNS_CNT) or (PinSns[i].Postprocessor != PostProcessor)) {
+                if(PostProcessor != nullptr) PostProcessor(Ptr, GroupLen);
+                // Prepare for next group
+                PostProcessor = PinSns[i].Postprocessor;
+                GroupLen = 0;
+                Ptr = &States[i];
+            }
+        } // while i
     } // while true
 }
