@@ -25,22 +25,28 @@
 
 #define SNS_POLL_PERIOD_MS  72
 
+enum PinSnsState_t {pssLo, pssHi, pssRising, pssFalling};
+typedef void (*ftVoidPSnsStLen)(PinSnsState_t *PState, uint32_t Len);
+
 // Single pin setup data
 struct PinSns_t {
     GPIO_TypeDef *PGpio;
     uint16_t Pin;
     PinPullUpDown_t Pud;
-    ftVoidPVoidLen Postprocessor;
+    ftVoidPSnsStLen Postprocessor;
     void Init() const { PinSetupIn(PGpio, Pin, Pud); }
     void Off()  const { PinSetupAnalog(PGpio, Pin);  }
     bool IsHi() const { return PinIsSet(PGpio, Pin); }
 };
 
 // ================================= Settings ==================================
-extern void ProcessButtons(void *p, uint32_t Len);   // Buttons handler
+extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);   // Buttons handler
 
 // Motion sensors handler
-static void ProcessMSensors(void *p, uint32_t Len) { }
+static void ProcessMSensors(PinSnsState_t *PState, uint32_t Len) {
+
+
+}
 
 #define BUTTONS_CNT     4       // Setup appropriately. Required for buttons handler
 

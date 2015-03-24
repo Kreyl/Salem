@@ -22,8 +22,6 @@
 #endif
 #include <PinSnsSettings.h>
 
-enum PinSnsState_t {pssLo, pssHi, pssRising, pssFalling};
-
 class SimpleSensors_t {
 private:
     PinSnsState_t States[PIN_SNS_CNT];

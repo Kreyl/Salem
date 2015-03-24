@@ -31,9 +31,9 @@ __attribute__((noreturn))
 void SimpleSensors_t::ITask() {
     while(true) {
         chThdSleepMilliseconds(SNS_POLL_PERIOD_MS);
-        ftVoidPVoidLen PostProcessor = PinSns[0].Postprocessor;
+        ftVoidPSnsStLen PostProcessor = PinSns[0].Postprocessor;
         uint32_t GroupLen = 0;
-        void *Ptr = &States[0];
+        PinSnsState_t *PStates = &States[0];
         // ==== Iterate pins ====
         uint32_t i=0;
         while(i < PIN_SNS_CNT) {
@@ -50,11 +50,11 @@ void SimpleSensors_t::ITask() {
             // Call postprocessor if this was last pin in group (or last at all)
             i++;
             if((i >= PIN_SNS_CNT) or (PinSns[i].Postprocessor != PostProcessor)) {
-                if(PostProcessor != nullptr) PostProcessor(Ptr, GroupLen);
+                if(PostProcessor != nullptr) PostProcessor(PStates, GroupLen);
                 // Prepare for next group
                 PostProcessor = PinSns[i].Postprocessor;
                 GroupLen = 0;
-                Ptr = &States[i];
+                PStates = &States[i];
             }
         } // while i
     } // while true
