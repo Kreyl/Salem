@@ -29,7 +29,11 @@
 #define BTN_LONGPRESS_DELAY_MS      603
 #define BTN_DELAY_BEFORE_REPEAT_MS  (BTN_REPEAT_PERIOD_MS + BTN_LONGPRESS_DELAY_MS)
 
+#if BTN_COMBO
 #define BTNS_EVT_Q_LEN              7   // Length of events' query
+#else
+#define BTNS_EVT_Q_LEN              1   // No need in queue if combo not allowed
+#endif
 
 // Select convenient names
 enum BtnName_t {btnRTop=0, btnRBottom=1, btnLTop=2, btnLBottom=3};

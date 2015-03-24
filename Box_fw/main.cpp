@@ -66,35 +66,31 @@ void App_t::ITask() {
         if(EvtMsk & EVTMSK_BUTTONS) {
             BtnEvtInfo_t EInfo;
             while(ButtonEvtBuf.Get(&EInfo) == OK) {
-                Uart.Printf("\rEinfo: %u, %u,  %A", EInfo.Type, EInfo.BtnCnt, EInfo.BtnID, EInfo.BtnCnt, '-');
-                /*
-                if(EInfo.Type == kePress or EInfo.Type == keRepeat) {
-                    Beeper.StartSequence(bsqButton);
-                    switch(EInfo.KeyID[0]) {
-                        case keyLTop:
-                            SignalEvt(EVTMSK_MSNS_ON);
-                            break;
+//                Uart.Printf("\rEinfo: %u, %u,  %A", EInfo.Type, EInfo.BtnCnt, EInfo.BtnID, EInfo.BtnCnt, '-');
+                Beeper.StartSequence(bsqButton);
+                switch(EInfo.BtnID[0]) {
+                    case btnLTop:
+                        SignalEvt(EVTMSK_MSNS_ON);
+                        break;
 
-                        case keyLBottom:
-                            SignalEvt(EVTMSK_MSNS_OFF);
-                            break;
+                    case btnLBottom:
+                        SignalEvt(EVTMSK_MSNS_OFF);
+                        break;
 
-                        case keyRTop:
-                            if(Settings.DurationActive_s < DURATION_ACTIVE_MAX) Settings.DurationActive_s += 10;
-                            SaveSettings();
-                            Interface.ShowDurationActive();
-                            break;
+                    case btnRTop:
+                        if(Settings.DurationActive_s < DURATION_ACTIVE_MAX) Settings.DurationActive_s += 10;
+                        SaveSettings();
+                        Interface.ShowDurationActive();
+                        break;
 
-                        case keyRBottom:
-                            if(Settings.DurationActive_s > DURATION_ACTIVE_MIN) Settings.DurationActive_s -= 10;
-                            SaveSettings();
-                            Interface.ShowDurationActive();
-                            break;
+                    case btnRBottom:
+                        if(Settings.DurationActive_s > DURATION_ACTIVE_MIN) Settings.DurationActive_s -= 10;
+                        SaveSettings();
+                        Interface.ShowDurationActive();
+                        break;
 
-                        default: break;
-                    } // switch
-                } // if press
-                */
+                    default: break;
+                } // switch
             } // while get
         } // if buttons
 #endif
