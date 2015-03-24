@@ -8,107 +8,107 @@
 #include <buttons.h>
 #include "ch.h"
 #include "evt_mask.h"
-#include "SimpleSensors.h"
 #include "uart.h"
+#include "main.h" // App.Thread is here
 
-Btns_t Btns;
+CircBuf_t<BtnEvtInfo_t, BTNS_EVT_Q_LEN> ButtonEvtBuf;
 
 // ==== Inner use ====
 #if BTN_LONGPRESS
-//static bool IsRepeating[BUTTONS_CNT], IsLongPress[BUTTONS_CNT];
+static bool IsRepeating[BUTTONS_CNT], IsLongPress[BUTTONS_CNT];
+static systime_t RepeatTimer, LongPressTimer;
 #endif
 //static systime_t RepeatTimer, LongPressTimer;
 #if BTN_COMBO
     bool IsCombo;
 #endif
-//static void AddEvtToQueue(BtnEvtInfo_t Evt);
-//static void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx);
+static void AddEvtToQueue(BtnEvtInfo_t Evt);
+static void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx);
 
-// ==== Postprocessor for PinSns ====
+// ========================= Postprocessor for PinSns ==========================
 void ProcessButtons(void *p, uint32_t Len) {
-    PinSnsState_t *State = (PinSnsState_t*)p;
+    PinSnsState_t *BtnState = (PinSnsState_t*)p;
 //    Uart.Printf("\r%A", p, Len, ' ');
-}
-
-/*
-
-void Keys_t::ProcessKeysState(bool *PCurrentState) {
-//    Uart.Printf("\r%A", PCurrentState, KEYS_CNT, ' ');
-    // Iterate keys
-    for(uint8_t i=0; i<KEYS_CNT; i++) {
-        bool PressedNow = KeyIsPressed(PCurrentState[i]);
-
-        // ==== Key Press ====
-        if(PressedNow and !Key[i].IsPressed) {
-            Key[i].IsPressed = true;
-#if KEY_LONGPRESS
-            Key[i].IsLongPress = false;
-            Key[i].IsRepeating = false;
+    for(uint8_t i=0; i<BUTTONS_CNT; i++) {
+        // ==== Button Press ====
+        if(BtnState[i] == BTN_PRESS_STATE) {
+#if BTN_LONGPRESS
+            IsLongPress[i] = false;
+            IsRepeating[i] = false;
 #endif
-            KeyEvtInfo_t IEvt;
-            IEvt.KeysCnt = 0;
-            // Check if combo
-            for(uint8_t j=0; j<KEYS_CNT; j++) {
-                if(Key[j].IsPressed) {
-                    IEvt.KeyID[IEvt.KeysCnt] = j;
-                    IEvt.KeysCnt++;
+            BtnEvtInfo_t IEvt;
+#if BTN_COMBO // Check if combo
+            IEvt.BtnCnt = 0;
+            for(uint8_t j=0; j<BUTTONS_CNT; j++) {
+                if(BtnState[j] == BTN_HOLDDOWN_STATE or BtnState[j] == BTN_PRESS_STATE) {
+                    IEvt.BtnID[IEvt.BtnCnt] = j;
+                    IEvt.BtnCnt++;
                     if((j != i) and !IsCombo) {
                         IsCombo = true;
-                        AddEvtToQueue(keCancel, j);
+                        AddEvtToQueue(beCancel, j);
                     }
                 }
             } // for j
-            if(IEvt.KeysCnt == 1) {   // Single key pressed, no combo
-                IsCombo = false;
-                IEvt.Type = kePress;
-#if KEY_LONGPRESS   // Reset timers
-                RepeatTimer = chTimeNow();
-                LongPressTimer = chTimeNow();
-#endif
+            if(IEvt.BtnCnt > 1) { // Combo
+                IEvt.Type = beCombo;
+                AddEvtToQueue(IEvt);
+                continue;
             }
-            else IEvt.Type = keCombo;
-            AddEvtToQueue(IEvt);
-        } // if became pressed
+            else IsCombo = false;
+#endif // combo
+            // Single key pressed, no combo
+            AddEvtToQueue(bePress, i);  // Add single keypress
+#if BTN_LONGPRESS
+            RepeatTimer = chTimeNow();
+            LongPressTimer = chTimeNow();
+#endif
+        } // if press
 
-        // ==== Key Release ====
-        else if(!PressedNow and Key[i].IsPressed) {
-            Key[i].IsPressed = false;
-#if KEY_COMBO
-            // Check if combo completely released
+        // ==== Button Release ====
+#if BTN_COMBO || BTN_RELEASE
+        else if(BtnState[i] == BTN_RELEASE_STATE) {
+#if BTN_COMBO // Check if combo completely released
             if(IsCombo) {
                 IsCombo = false;
-                for(uint8_t j=0; j<KEYS_CNT; j++) {
-                    if(Key[j].IsPressed) {
+                for(uint8_t j=0; j<BUTTONS_CNT; j++) {
+                    if(BtnState[j] == BTN_HOLDDOWN_STATE) {
                         IsCombo = true;
                         break;
                     }
                 }
+                continue; // do not send release evt (if enabled)
             } // if combo
 #endif
-#if KEY_RELEASE // Send evt if not combo
-            else AddEvtToQueue(keRelease, i);
+#if BTN_RELEASE // Send evt if not combo
+            AddEvtToQueue(beRelease, i);
 #endif
         }
+#endif // if combo or release
 
-#if KEY_LONGPRESS // ==== Long Press ====
-        else if(PressedNow and Key[i].IsPressed and !IsCombo) {
+        // ==== Long Press ====
+#if BTN_LONGPRESS
+        else if(BtnState[i] == BTN_HOLDDOWN_STATE
+#if BTN_COMBO
+                and !IsCombo
+#endif
+                ) {
             // Check if long press
-            if(!Key[i].IsLongPress) {
-                if(TimeElapsed(&LongPressTimer, KEY_LONGPRESS_DELAY_MS)) {
-                    Key[i].IsLongPress = true;
-                    AddEvtToQueue(keLongPress, i);
+            if(!IsLongPress[i]) {
+                if(TimeElapsed(&LongPressTimer, BTN_LONGPRESS_DELAY_MS)) {
+                    IsLongPress[i] = true;
+                    AddEvtToQueue(beLongPress, i);
                 }
             }
             // Check if repeat
-            if(!Key[i].IsRepeating) {
-                if(TimeElapsed(&RepeatTimer, KEYS_DELAY_BEFORE_REPEAT_MS)) {
-                    Key[i].IsRepeating = true;
-                    AddEvtToQueue(keRepeat, i);
+            if(!IsRepeating[i]) {
+                if(TimeElapsed(&RepeatTimer, BTN_DELAY_BEFORE_REPEAT_MS)) {
+                    IsRepeating[i] = true;
+                    AddEvtToQueue(beRepeat, i);
                 }
             }
             else {
-                if(TimeElapsed(&RepeatTimer, KEY_REPEAT_PERIOD_MS)) {
-                    AddEvtToQueue(keRepeat, i);
+                if(TimeElapsed(&RepeatTimer, BTN_REPEAT_PERIOD_MS)) {
+                    AddEvtToQueue(beRepeat, i);
                 }
             }
         } // if still pressed
@@ -116,25 +116,24 @@ void Keys_t::ProcessKeysState(bool *PCurrentState) {
     } // for i
 }
 
-void Keys_t::AddEvtToQueue(KeyEvtInfo_t Evt) {
+void AddEvtToQueue(BtnEvtInfo_t Evt) {
 //    Uart.Printf("EvtType=%u; Keys: ", Evt.Type);
 //    for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
 //    Uart.Printf("\r\n");
     if(App.PThread == nullptr) return;
     chSysLock();
-    EvtBuf.Put(&Evt);
-    chEvtSignalI(App.PThread, EVTMSK_KEYS);
+    ButtonEvtBuf.Put(&Evt);
+    chEvtSignalI(App.PThread, EVTMSK_BUTTONS);
     chSysUnlock();
 }
 
-void Keys_t::AddEvtToQueue(KeyEvt_t AType, uint8_t KeyIndx) {
-    KeyEvtInfo_t IEvt;
+void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx) {
+    BtnEvtInfo_t IEvt;
     IEvt.Type = AType;
-    IEvt.KeysCnt = 1;
-    IEvt.KeyID[0] = KeyIndx;
+    IEvt.BtnCnt = 1;
+    IEvt.BtnID[0] = KeyIndx;
     chSysLock();
-    EvtBuf.Put(&IEvt);
-    chEvtSignalI(App.PThread, EVTMSK_KEYS);
+    ButtonEvtBuf.Put(&IEvt);
+    chEvtSignalI(App.PThread, EVTMSK_BUTTONS);
     chSysUnlock();
 }
-*/

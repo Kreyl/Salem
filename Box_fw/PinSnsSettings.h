@@ -23,7 +23,7 @@
 #include "kl_lib_L15x.h"
 #endif
 
-#define SNS_POLL_PERIOD_MS  72
+#define SNS_POLL_PERIOD_MS  180//72
 
 // Single pin setup data
 struct PinSns_t {

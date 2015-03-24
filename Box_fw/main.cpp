@@ -62,11 +62,12 @@ __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-#if 0 // ==== Keys ====
+#if 1 // ==== Buttons ====
         if(EvtMsk & EVTMSK_BUTTONS) {
-            KeyEvtInfo_t EInfo;
-            while(Keys.EvtBuf.Get(&EInfo) == OK) {
-//                Uart.Printf("\rEinfo: %u, %u, %u", EInfo.Type, EInfo.KeysCnt, EInfo.KeyID[0]);
+            BtnEvtInfo_t EInfo;
+            while(ButtonEvtBuf.Get(&EInfo) == OK) {
+                Uart.Printf("\rEinfo: %u, %u,  %A", EInfo.Type, EInfo.BtnCnt, EInfo.BtnID, EInfo.BtnCnt, '-');
+                /*
                 if(EInfo.Type == kePress or EInfo.Type == keRepeat) {
                     Beeper.StartSequence(bsqButton);
                     switch(EInfo.KeyID[0]) {
@@ -93,8 +94,9 @@ void App_t::ITask() {
                         default: break;
                     } // switch
                 } // if press
+                */
             } // while get
-        } // if keys
+        } // if buttons
 #endif
 
 #if 1 // ==== Motion sensors ====
