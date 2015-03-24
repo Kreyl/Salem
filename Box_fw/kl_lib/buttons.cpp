@@ -15,15 +15,19 @@ CircBuf_t<BtnEvtInfo_t, BTNS_EVT_Q_LEN> ButtonEvtBuf;
 
 // ==== Inner use ====
 #if BTN_LONGPRESS
-static bool IsRepeating[BUTTONS_CNT], IsLongPress[BUTTONS_CNT];
-static systime_t RepeatTimer, LongPressTimer;
+static bool IsLongPress[BUTTONS_CNT];
+static systime_t LongPressTimer;
+#endif
+#if BTN_REPEAT
+static bool IsRepeating[BUTTONS_CNT];
+static systime_t RepeatTimer;
 #endif
 //static systime_t RepeatTimer, LongPressTimer;
 #if BTN_COMBO
     bool IsCombo;
 #endif
-static void AddEvtToQueue(BtnEvtInfo_t Evt);
-static void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx);
+void AddEvtToQueue(BtnEvtInfo_t Evt);
+void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx);
 
 // ========================= Postprocessor for PinSns ==========================
 void ProcessButtons(void *p, uint32_t Len) {
@@ -34,10 +38,12 @@ void ProcessButtons(void *p, uint32_t Len) {
         if(BtnState[i] == BTN_PRESS_STATE) {
 #if BTN_LONGPRESS
             IsLongPress[i] = false;
+#endif
+#if BTN_REPEAT
             IsRepeating[i] = false;
 #endif
-            BtnEvtInfo_t IEvt;
 #if BTN_COMBO // Check if combo
+            BtnEvtInfo_t IEvt;
             IEvt.BtnCnt = 0;
             for(uint8_t j=0; j<BUTTONS_CNT; j++) {
                 if(BtnState[j] == BTN_HOLDDOWN_STATE or BtnState[j] == BTN_PRESS_STATE) {
@@ -59,8 +65,10 @@ void ProcessButtons(void *p, uint32_t Len) {
             // Single key pressed, no combo
             AddEvtToQueue(bePress, i);  // Add single keypress
 #if BTN_LONGPRESS
-            RepeatTimer = chTimeNow();
             LongPressTimer = chTimeNow();
+#endif
+#if BTN_REPEAT
+            RepeatTimer = chTimeNow();
 #endif
         } // if press
 
@@ -86,20 +94,21 @@ void ProcessButtons(void *p, uint32_t Len) {
 #endif // if combo or release
 
         // ==== Long Press ====
-#if BTN_LONGPRESS
+#if BTN_LONGPRESS || BTN_REPEAT
         else if(BtnState[i] == BTN_HOLDDOWN_STATE
 #if BTN_COMBO
                 and !IsCombo
 #endif
                 ) {
-            // Check if long press
+#if BTN_LONGPRESS // Check if long press
             if(!IsLongPress[i]) {
                 if(TimeElapsed(&LongPressTimer, BTN_LONGPRESS_DELAY_MS)) {
                     IsLongPress[i] = true;
                     AddEvtToQueue(beLongPress, i);
                 }
             }
-            // Check if repeat
+#endif
+#if BTN_REPEAT // Check if repeat
             if(!IsRepeating[i]) {
                 if(TimeElapsed(&RepeatTimer, BTN_DELAY_BEFORE_REPEAT_MS)) {
                     IsRepeating[i] = true;
@@ -111,15 +120,13 @@ void ProcessButtons(void *p, uint32_t Len) {
                     AddEvtToQueue(beRepeat, i);
                 }
             }
+#endif
         } // if still pressed
 #endif
     } // for i
 }
 
 void AddEvtToQueue(BtnEvtInfo_t Evt) {
-//    Uart.Printf("EvtType=%u; Keys: ", Evt.Type);
-//    for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
-//    Uart.Printf("\r\n");
     if(App.PThread == nullptr) return;
     chSysLock();
     ButtonEvtBuf.Put(&Evt);

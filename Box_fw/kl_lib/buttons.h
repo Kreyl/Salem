@@ -20,9 +20,10 @@
 #include "SimpleSensors.h"
 
 // Select required events. BtnPress is a must.
-#define BTN_RELEASE     TRUE
-#define BTN_LONGPRESS   TRUE
-#define BTN_COMBO       TRUE
+#define BTN_RELEASE     FALSE
+#define BTN_LONGPRESS   FALSE    // Send LongPress evt
+#define BTN_REPEAT      TRUE    // Send Repeat evt
+#define BTN_COMBO       FALSE   // Allow combo
 
 #define BTN_REPEAT_PERIOD_MS        180
 #define BTN_LONGPRESS_DELAY_MS      603
