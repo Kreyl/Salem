@@ -97,9 +97,11 @@ void App_t::ITask() {
 
 #if 1 // ==== Motion sensors ====
         if(EvtMsk & EVTMSK_MSNS_ON) {
+            Uart.Printf("\rMSns on");
             EnterActiveState();
         }
         if(EvtMsk & EVTMSK_MSNS_OFF) {
+            Uart.Printf("\rMSns off");
             EnterIdleState();
         }
 #endif

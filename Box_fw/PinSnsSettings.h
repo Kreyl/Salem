@@ -23,6 +23,9 @@
 #include "kl_lib_L15x.h"
 #endif
 
+#include "main.h" // App.thd here
+#include "evt_mask.h"
+
 #define SNS_POLL_PERIOD_MS  72
 
 enum PinSnsState_t {pssLo, pssHi, pssRising, pssFalling};
@@ -44,8 +47,19 @@ extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);   // Buttons ha
 
 // Motion sensors handler
 static void ProcessMSensors(PinSnsState_t *PState, uint32_t Len) {
-
-
+    // Send ON evt if any is rising
+    if(PState[0] == pssRising or PState[1] == pssRising) {
+        chSysLock();
+        chEvtSignalI(App.PThread, EVTMSK_MSNS_ON);
+        chSysUnlock();
+    }
+    // Send OFF evt if one is falling and other is low
+    else if((PState[0] == pssFalling and PState[1] == pssLo) or
+            (PState[1] == pssFalling and PState[0] == pssLo)) {
+        chSysLock();
+        chEvtSignalI(App.PThread, EVTMSK_MSNS_OFF);
+        chSysUnlock();
+    }
 }
 
 #define BUTTONS_CNT     4       // Setup appropriately. Required for buttons handler
