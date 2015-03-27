@@ -72,23 +72,35 @@ void App_t::ITask() {
                 Beeper.StartSequence(bsqButton);
                 switch(EInfo.BtnID[0]) {
                     case btnLTop:
-                        SignalEvt(EVTMSK_MSNS_ON);
+                        if(Settings.ID < ID_MAX) {
+                            Settings.ID++;
+                            SaveSettings();
+                            Interface.ShowID();
+                        }
                         break;
 
                     case btnLBottom:
-                        SignalEvt(EVTMSK_MSNS_OFF);
+                        if(Settings.ID > ID_MIN) {
+                            Settings.ID--;
+                            SaveSettings();
+                            Interface.ShowID();
+                        }
                         break;
 
                     case btnRTop:
-                        if(Settings.DurationActive_s < DURATION_ACTIVE_MAX) Settings.DurationActive_s += 10;
-                        SaveSettings();
-                        Interface.ShowDurationActive();
+                        if(Settings.DurationActive_s < DURATION_ACTIVE_MAX) {
+                            Settings.DurationActive_s += 10;
+                            SaveSettings();
+                            Interface.ShowDurationActive();
+                        }
                         break;
 
                     case btnRBottom:
-                        if(Settings.DurationActive_s > DURATION_ACTIVE_MIN) Settings.DurationActive_s -= 10;
-                        SaveSettings();
-                        Interface.ShowDurationActive();
+                        if(Settings.DurationActive_s > DURATION_ACTIVE_MIN) {
+                            Settings.DurationActive_s -= 10;
+                            SaveSettings();
+                            Interface.ShowDurationActive();
+                        }
                         break;
 
                     default: break;
@@ -126,14 +138,12 @@ void App_t::ITask() {
 }
 
 void App_t::LoadSettings() {
-    Settings_t *p = EE_PTR;
-    if(p->DurationActive_s < DURATION_ACTIVE_MIN or p->DurationActive_s > DURATION_ACTIVE_MAX) {
-        // Setup defaults
+    if(EE_PTR->DurationActive_s < DURATION_ACTIVE_MIN or EE_PTR->DurationActive_s > DURATION_ACTIVE_MAX) {
         Settings.DurationActive_s = DURATION_ACTIVE_DEFAULT;
     }
-    else {
-        Settings.DurationActive_s = p->DurationActive_s;
-    }
+    else Settings.DurationActive_s = EE_PTR->DurationActive_s;
+    if(EE_PTR->ID < ID_MIN or EE_PTR->ID > ID_MAX) Settings.ID = ID_DEFAULT;
+    else Settings.ID = EE_PTR->ID;
 }
 
 void App_t::SaveSettings() {

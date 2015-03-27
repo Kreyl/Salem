@@ -48,7 +48,7 @@ private:
     void EnterRX()     { WriteStrobe(CC_SRX);  }
     void FlushRxFIFO() { WriteStrobe(CC_SFRX); }
 public:
-    void Init();
+    uint8_t Init();
     void SetChannel(uint8_t AChannel);
     void SetTxPower(uint8_t APwr)  { WriteRegister(CC_PATABLE, APwr); }
     void SetPktSize(uint8_t ASize) { WriteRegister(CC_PKTLEN, ASize); IPktSz = ASize; }

@@ -25,6 +25,9 @@ struct Settings_t {
 #define DURATION_ACTIVE_MIN     10
 #define DURATION_ACTIVE_MAX     9990
 #define DURATION_ACTIVE_DEFAULT 300
+#define ID_MIN                  1
+#define ID_MAX                  18
+#define ID_DEFAULT              ID_MIN
 
 class App_t {
 private:

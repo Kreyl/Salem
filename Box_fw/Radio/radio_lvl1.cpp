@@ -75,11 +75,13 @@ __attribute__((__noreturn__)) void rLevel1_t::ITask() {
         int8_t Rssi;
         uint8_t RxRslt;
         // ==== Everyone listen to pelengator ==== except pelengator and radiating grenade
-        CC.SetChannel(ID2RCHNL(App.Settings.ID));
+//        CC.SetChannel(ID2RCHNL(App.Settings.ID));
+        CC.SetChannel(9);
         RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
         if(RxRslt == OK) {
+//            Uart.Printf("\rRx ID=%u; TestWord=%X", Pkt.ID, Pkt.TestWord);
             if(Pkt.TestWord == TEST_WORD and Pkt.ID == App.Settings.ID) {
-                Uart.Printf("\rRx");
+
             } // if test word
         } // if OK
 
@@ -90,14 +92,17 @@ __attribute__((__noreturn__)) void rLevel1_t::ITask() {
 
 #if 1 // ============================
 void rLevel1_t::Init() {
-#ifdef DBG_PINS
-    PinSetupOut(DBG_GPIO1, DBG_PIN1, omPushPull);
-#endif
     // Init radioIC
-    CC.Init();
-    CC.SetTxPower(CC_Pwr0dBm);
-    CC.SetPktSize(RPKT_LEN);
-    // Thread
-    chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
+    if(CC.Init() == OK) {
+        CC.SetTxPower(CC_Pwr0dBm);
+        CC.SetPktSize(RPKT_LEN);
+        // Thread
+        chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
+#ifdef DBG_PINS
+        PinSetupOut(DBG_GPIO1, DBG_PIN1, omPushPull);
+#endif
+//        Uart.Printf("\rCC init OK");
+    }
+    else Uart.Printf("\rCC init error");
 }
 #endif

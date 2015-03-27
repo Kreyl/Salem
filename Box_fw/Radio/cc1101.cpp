@@ -11,7 +11,7 @@
 
 cc1101_t CC;
 
-void cc1101_t::Init() {
+uint8_t cc1101_t::Init() {
     // ==== GPIO ====
     PinSetupOut      (CC_GPIO, CC_CS,   omPushPull, pudNone);
     PinSetupAlterFunc(CC_GPIO, CC_SCK,  omPushPull, pudNone, AF5);
@@ -25,12 +25,21 @@ void cc1101_t::Init() {
     ISpi.Enable();
     // ==== Init CC ====
     CReset();
+    // Check if success
+    WriteRegister(CC_PKTLEN, 7);
+    uint8_t Rpl = ReadRegister(CC_PKTLEN);
+    if(Rpl != 7) {
+        ISpi.Disable();
+        return FAILURE;
+    }
+    // Proceed with init
     FlushRxFIFO();
     RfConfig();
     PWaitingThread = nullptr;
     // ==== IRQ ====
     IGdo0.Setup(CC_GPIO, CC_GDO0, ttFalling);
     IGdo0.EnableIrq(IRQ_PRIO_HIGH);
+    return OK;
 }
 
 // ========================== TX, RX, freq and power ===========================
@@ -183,7 +192,6 @@ void cc1101_t::RfConfig() {
     WriteRegister(CC_IOCFG0,   CC_IOCFG0_VALUE);     // GDO0 output pin configuration.
     WriteRegister(CC_PKTCTRL1, CC_PKTCTRL1_VALUE);   // Packet automation control.
     WriteRegister(CC_PKTCTRL0, CC_PKTCTRL0_VALUE);   // Packet automation control.
-    WriteRegister(CC_PKTLEN,   7);                   // Packet length, dummy
 
     WriteRegister(CC_PATABLE, CC_Pwr0dBm);
 
