@@ -54,9 +54,9 @@ public:
     void SetPktSize(uint8_t ASize) { WriteRegister(CC_PKTLEN, ASize); IPktSz = ASize; }
     // State change
     void TransmitSync(void *Ptr);
-    uint8_t ReceiveSync(uint32_t Timeout_ms, void *Ptr, int8_t *PRssi);
-    void EnterIdle()  { WriteStrobe(CC_SIDLE); }
-    void Sleep() { WriteStrobe(CC_SPWD); }
+    uint8_t ReceiveSync(uint32_t Timeout_ms, void *Ptr, int8_t *PRssi=nullptr);
+    void EnterIdle()    { WriteStrobe(CC_SIDLE); }
+    void EnterPwrDown() { WriteStrobe(CC_SPWD);  }
     void Recalibrate() {
         while(IState != CC_STB_IDLE) EnterIdle();
         WriteStrobe(CC_SCAL);

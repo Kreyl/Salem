@@ -72,19 +72,17 @@ __attribute__((__noreturn__)) void rLevel1_t::ITask() {
 #endif
 
 #if 1 // ============ RX cycle ============
-        int8_t Rssi;
         uint8_t RxRslt;
-        // ==== Everyone listen to pelengator ==== except pelengator and radiating grenade
-//        CC.SetChannel(ID2RCHNL(App.Settings.ID));
-        CC.SetChannel(9);
-        RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
+        CC.SetChannel(ID2RCHNL(App.Settings.ID));
+        RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt);
         if(RxRslt == OK) {
 //            Uart.Printf("\rRx ID=%u; TestWord=%X", Pkt.ID, Pkt.TestWord);
             if(Pkt.TestWord == TEST_WORD and Pkt.ID == App.Settings.ID) {
-
+                App.SignalEvt(EVTMSK_RADIO_RX);
             } // if test word
         } // if OK
-
+        CC.EnterPwrDown();
+        chThdSleepMilliseconds(RX_SLEEP_T_MS);
 #endif // RX
     } // while true
 }

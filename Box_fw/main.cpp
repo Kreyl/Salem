@@ -20,14 +20,8 @@ Beeper_t Beeper;
 LedSmooth_t Led({GPIOB, 4, TIM3, 1});
 Interface_t Interface;
 
-#if 1 // ============================ Timers ===================================
 // Universal VirtualTimer callback
-void TmrGeneralCallback(void *p) {
-    chSysLockFromIsr();
-    chEvtSignalI(App.PThread, (eventmask_t)p);
-    chSysUnlockFromIsr();
-}
-#endif
+void TmrGeneralCallback(void *p) { App.SignalEvtI((eventmask_t)p); }
 
 int main(void) {
     // ==== Init Vcore & clock system ====
@@ -42,7 +36,7 @@ int main(void) {
     Uart.Init(115200);
     Uart.Printf("\rSalemBox AHB=%u", Clk.AHBFreqHz);
 
-    App.PThread = chThdSelf();
+    App.InitThread();
 
     Lcd.Init();
     Lcd.Backlight(50);
@@ -88,7 +82,7 @@ void App_t::ITask() {
                         break;
 
                     case btnRTop:
-                        if(Settings.DurationActive_s < DURATION_ACTIVE_MAX) {
+                        if(Settings.DurationActive_s < DURATION_ACTIVE_MAX_S) {
                             Settings.DurationActive_s += 10;
                             SaveSettings();
                             Interface.ShowDurationActive();
@@ -96,7 +90,7 @@ void App_t::ITask() {
                         break;
 
                     case btnRBottom:
-                        if(Settings.DurationActive_s > DURATION_ACTIVE_MIN) {
+                        if(Settings.DurationActive_s > DURATION_ACTIVE_MIN_S) {
                             Settings.DurationActive_s -= 10;
                             SaveSettings();
                             Interface.ShowDurationActive();
@@ -124,6 +118,12 @@ void App_t::ITask() {
         }
 #endif
 
+#if 1 // ==== Radio RX ====
+        if(EvtMsk & EVTMSK_RADIO_RX) {
+            Uart.Printf("\rEvtRx");
+        }
+#endif
+
 #if 1 // ==== Time to enter Idle ====
         if(EvtMsk & EVTMSK_ENTER_IDLE) {
             chVTReset(&ITmrReturnToIdle);
@@ -137,11 +137,15 @@ void App_t::ITask() {
     } // while true
 }
 
+#if 1 // ===================== Load/save settings ==============================
 void App_t::LoadSettings() {
-    if(EE_PTR->DurationActive_s < DURATION_ACTIVE_MIN or EE_PTR->DurationActive_s > DURATION_ACTIVE_MAX) {
+    if(EE_PTR->DurationActive_s < DURATION_ACTIVE_MIN_S or
+       EE_PTR->DurationActive_s > DURATION_ACTIVE_MAX_S
+       ) {
         Settings.DurationActive_s = DURATION_ACTIVE_DEFAULT;
     }
     else Settings.DurationActive_s = EE_PTR->DurationActive_s;
+
     if(EE_PTR->ID < ID_MIN or EE_PTR->ID > ID_MAX) Settings.ID = ID_DEFAULT;
     else Settings.ID = EE_PTR->ID;
 }
@@ -170,4 +174,4 @@ void App_t::ISaveSettings() {
     if(r == OK) Uart.Printf("\rSettings saved");
     else Uart.Printf("\rSettings saving failure");
 }
-
+#endif

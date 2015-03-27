@@ -63,7 +63,7 @@ struct rPkt_t {
 #endif
 
 #if 1 // ======================= Channels & cycles =============================
-#define RCHNL_MIN       10
+#define RCHNL_MIN       5
 #define RCHNL_MAX
 
 #define ID2RCHNL(ID)    (RCHNL_MIN + ID)

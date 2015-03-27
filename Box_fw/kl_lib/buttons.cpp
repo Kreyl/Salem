@@ -126,10 +126,9 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
 }
 
 void AddEvtToQueue(BtnEvtInfo_t Evt) {
-    if(App.PThread == nullptr) return;
     chSysLock();
     ButtonEvtBuf.Put(&Evt);
-    chEvtSignalI(App.PThread, EVTMSK_BUTTONS);
+    App.SignalEvtI(EVTMSK_BUTTONS);
     chSysUnlock();
 }
 
@@ -140,6 +139,6 @@ void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx) {
     IEvt.BtnID[0] = KeyIndx;
     chSysLock();
     ButtonEvtBuf.Put(&IEvt);
-    chEvtSignalI(App.PThread, EVTMSK_BUTTONS);
+    App.SignalEvtI(EVTMSK_BUTTONS);
     chSysUnlock();
 }

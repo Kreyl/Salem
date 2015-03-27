@@ -49,17 +49,13 @@ extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);
 // Motion sensors handler
 static void ProcessMSensors(PinSnsState_t *PState, uint32_t Len) {
     // Send ON evt if any is rising
-    if(PState[0] == pssRising or PState[1] == pssRising) {
-        chSysLock();
-        chEvtSignalI(App.PThread, EVTMSK_MSNS_ON);
-        chSysUnlock();
-    }
+    if(PState[0] == pssRising or PState[1] == pssRising) App.SignalEvt(EVTMSK_MSNS_ON);
+
     // Send OFF evt if one is falling and other is low
     else if((PState[0] == pssFalling and PState[1] == pssLo) or
-            (PState[1] == pssFalling and PState[0] == pssLo)) {
-        chSysLock();
-        chEvtSignalI(App.PThread, EVTMSK_MSNS_OFF);
-        chSysUnlock();
+            (PState[1] == pssFalling and PState[0] == pssLo)
+            ) {
+        App.SignalEvt(EVTMSK_MSNS_OFF);
     }
 }
 
