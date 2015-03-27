@@ -28,9 +28,7 @@ struct Settings_t {
 
 class App_t {
 private:
-    VirtualTimer ISavingTmr;
-    void EnterIdleState();
-    void EnterActiveState();
+    VirtualTimer ITmrSaving, ITmrReturnToIdle;
     void ISaveSettings();    // Really save settings
 public:
     Thread *PThread;

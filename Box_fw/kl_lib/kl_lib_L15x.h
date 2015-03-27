@@ -134,6 +134,15 @@ void __attribute__ ((weak)) _init(void)  {}
 }
 #endif
 
+#if 1 // ====================== Virtual Timer ==================================
+static inline void chVTRestart(VirtualTimer *vtp, systime_t time, vtfunc_t vtfunc, void *par) {
+    chSysLock()
+    if(chVTIsArmedI(vtp)) chVTResetI(vtp);
+    chVTSetI(vtp, time, vtfunc, par);
+    chSysUnlock();
+}
+#endif
+
 #if 1 // =========================== Time ======================================
 static inline bool TimeElapsed(systime_t *PSince, uint32_t Delay_ms) {
     chSysLock();

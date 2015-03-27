@@ -236,7 +236,7 @@ const LedSmoothChunk_t lsqEnterActive[] = {
         {csEnd}
 };
 const LedSmoothChunk_t lsqEnterIdle[] = {
-        {csSetup, 3600, 0},
+        {csSetup, 360, 0},
         {csEnd}
 };
 

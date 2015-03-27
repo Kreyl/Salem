@@ -96,13 +96,24 @@ void App_t::ITask() {
 #endif
 
 #if 1 // ==== Motion sensors ====
+        // Sensors on, enter Active State now
         if(EvtMsk & EVTMSK_MSNS_ON) {
             Uart.Printf("\rMSns on");
-            EnterActiveState();
+            Led.StartSequence(lsqEnterActive);
+            chVTReset(&ITmrReturnToIdle);   // Do not enter idle if was preparing
         }
+        // Sensors off, wait DurationActive_s before entering Idle State
         if(EvtMsk & EVTMSK_MSNS_OFF) {
             Uart.Printf("\rMSns off");
-            EnterIdleState();
+            // Restart ReturnToIdle timer
+            chVTRestart(&ITmrReturnToIdle, S2ST(Settings.DurationActive_s), TmrGeneralCallback, (void*)EVTMSK_ENTER_IDLE);
+        }
+#endif
+
+#if 1 // ==== Time to enter Idle ====
+        if(EvtMsk & EVTMSK_ENTER_IDLE) {
+            chVTReset(&ITmrReturnToIdle);
+            Led.StartSequence(lsqEnterIdle);
         }
 #endif
 
@@ -111,15 +122,6 @@ void App_t::ITask() {
 #endif
     } // while true
 }
-
-
-void App_t::EnterIdleState() {
-    Led.StartSequence(lsqEnterIdle);
-}
-void App_t::EnterActiveState() {
-    Led.StartSequence(lsqEnterActive);
-}
-
 
 void App_t::LoadSettings() {
     Settings_t *p = EE_PTR;
@@ -134,8 +136,8 @@ void App_t::LoadSettings() {
 
 void App_t::SaveSettings() {
     chSysLock();
-    if(chVTIsArmedI(&ISavingTmr)) chVTResetI(&ISavingTmr);  // Reset timer
-    chVTSetI(&ISavingTmr, MS2ST(4500), TmrGeneralCallback, (void*)EVTMSK_SAVE);
+    if(chVTIsArmedI(&ITmrSaving)) chVTResetI(&ITmrSaving);  // Reset timer
+    chVTSetI(&ITmrSaving, MS2ST(4500), TmrGeneralCallback, (void*)EVTMSK_SAVE);
     chSysUnlock();
 }
 

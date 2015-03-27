@@ -43,7 +43,8 @@ struct PinSns_t {
 };
 
 // ================================= Settings ==================================
-extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);   // Buttons handler
+// Buttons handler
+extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);
 
 // Motion sensors handler
 static void ProcessMSensors(PinSnsState_t *PState, uint32_t Len) {
