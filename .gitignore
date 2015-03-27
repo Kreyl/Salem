@@ -31,3 +31,7 @@ Box_fw/Debug/lcd1200.d
 Box_fw/Debug/lcd1200.o
 Box_fw/Debug/main.d
 Box_fw/Debug/SalemBox.hex
+*.o
+Box_fw/Debug/makefile
+Box_fw/Debug/os/hal/subdir.mk
+*.mk

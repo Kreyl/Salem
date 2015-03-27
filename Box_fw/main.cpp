@@ -13,6 +13,7 @@
 #include "beeper.h"
 #include "Sequences.h"
 #include "led.h"
+#include "radio_lvl1.h"
 
 App_t App;
 Beeper_t Beeper;
@@ -53,6 +54,7 @@ int main(void) {
     Beeper.StartSequence(bsqBeepBeep);
 
     Led.Init();
+    Radio.Init();
 
     // Main cycle
     App.ITask();
