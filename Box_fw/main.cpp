@@ -21,7 +21,11 @@ LedSmooth_t Led({GPIOB, 4, TIM3, 1});
 Interface_t Interface;
 
 // Universal VirtualTimer callback
-void TmrGeneralCallback(void *p) { App.SignalEvtI((eventmask_t)p); }
+void TmrGeneralCallback(void *p) {
+    chSysLockFromIsr();
+    App.SignalEvtI((eventmask_t)p);
+    chSysUnlockFromIsr();
+}
 
 int main(void) {
     // ==== Init Vcore & clock system ====
@@ -107,27 +111,35 @@ void App_t::ITask() {
         // Sensors on, enter Active State now
         if(EvtMsk & EVTMSK_MSNS_ON) {
             Uart.Printf("\rMSns on");
-            Led.StartSequence(lsqEnterActive);
-            chVTReset(&ITmrReturnToIdle);   // Do not enter idle if was preparing
+            LedBySnsMustBeOn = true;
+            chVTReset(&ITmrMSnsTimeout);
+            IProcessLedLogic();
         }
         // Sensors off, wait DurationActive_s before entering Idle State
         if(EvtMsk & EVTMSK_MSNS_OFF) {
             Uart.Printf("\rMSns off");
             // Restart ReturnToIdle timer
-            chVTRestart(&ITmrReturnToIdle, S2ST(Settings.DurationActive_s), TmrGeneralCallback, (void*)EVTMSK_ENTER_IDLE);
+            chVTRestart(&ITmrMSnsTimeout, S2ST(Settings.DurationActive_s), EVTMSK_MSNS_AFTEROFF_TIMEOUT);
+        }
+        // Timeout after Msns off: sensors were off some time ago
+        if(EvtMsk & EVTMSK_MSNS_AFTEROFF_TIMEOUT) {
+            Uart.Printf("\rMSns timeout");
+            LedBySnsMustBeOn = false;
+            IProcessLedLogic();
         }
 #endif
 
-#if 1 // ==== Radio RX ====
+#if 1 // ==== Radio ====
         if(EvtMsk & EVTMSK_RADIO_RX) {
-            Uart.Printf("\rEvtRx");
+            Uart.Printf("\rRadioRx");
+            RadioIsOn = true;
+            chVTRestart(&ITmrRadioTimeout, S2ST(RADIO_NOPKT_TIMEOUT_S), EVTMSK_RADIO_ON_TIMEOUT);
+            IProcessLedLogic();
         }
-#endif
-
-#if 1 // ==== Time to enter Idle ====
-        if(EvtMsk & EVTMSK_ENTER_IDLE) {
-            chVTReset(&ITmrReturnToIdle);
-            Led.StartSequence(lsqEnterIdle);
+        if(EvtMsk & EVTMSK_RADIO_ON_TIMEOUT) {
+            Uart.Printf("\rRadioTimeout");
+            RadioIsOn = false;
+            IProcessLedLogic();
         }
 #endif
 
@@ -135,6 +147,14 @@ void App_t::ITask() {
         if(EvtMsk & EVTMSK_SAVE) { ISaveSettings(); }
 #endif
     } // while true
+}
+
+void App_t::IProcessLedLogic() {
+    if(LedBySnsMustBeOn) {
+        if(RadioIsOn) Led.StartSequence(lsqEnterIdle);
+        else          Led.StartSequence(lsqEnterActive);
+    }
+    else Led.StartSequence(lsqEnterIdle);
 }
 
 #if 1 // ===================== Load/save settings ==============================
@@ -153,7 +173,7 @@ void App_t::LoadSettings() {
 void App_t::SaveSettings() {
     chSysLock();
     if(chVTIsArmedI(&ITmrSaving)) chVTResetI(&ITmrSaving);  // Reset timer
-    chVTSetI(&ITmrSaving, MS2ST(4500), TmrGeneralCallback, (void*)EVTMSK_SAVE);
+    chVTSetEvtI(&ITmrSaving, MS2ST(4500), EVTMSK_SAVE);
     chSysUnlock();
 }
 

@@ -135,11 +135,24 @@ void __attribute__ ((weak)) _init(void)  {}
 #endif
 
 #if 1 // ====================== Virtual Timer ==================================
+// Universal VirtualTimer callback
+extern void TmrGeneralCallback(void *p);
+
 static inline void chVTRestart(VirtualTimer *vtp, systime_t time, vtfunc_t vtfunc, void *par) {
     chSysLock()
     if(chVTIsArmedI(vtp)) chVTResetI(vtp);
     chVTSetI(vtp, time, vtfunc, par);
     chSysUnlock();
+}
+static inline void chVTRestart(VirtualTimer *vtp, systime_t time, eventmask_t Evt) {
+    chSysLock()
+    if(chVTIsArmedI(vtp)) chVTResetI(vtp);
+    chVTSetI(vtp, time, TmrGeneralCallback, (void*)Evt);
+    chSysUnlock();
+}
+
+static inline void chVTSetEvtI(VirtualTimer *vtp, systime_t time, eventmask_t Evt) {
+    chVTSetI(vtp, time, TmrGeneralCallback, (void*)Evt);
 }
 #endif
 

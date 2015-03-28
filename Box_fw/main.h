@@ -32,13 +32,15 @@ struct Settings_t {
 #define ID_DEFAULT              ID_MIN
 
 // Radio timing
-#define RADIO_NOPKT_DURATION_S  4
+#define RADIO_NOPKT_TIMEOUT_S   4
 
 class App_t {
 private:
-    VirtualTimer ITmrSaving, ITmrReturnToIdle;
+    bool RadioIsOn, LedBySnsMustBeOn;
+    VirtualTimer ITmrSaving, ITmrMSnsTimeout, ITmrRadioTimeout;
     void ISaveSettings();    // Really save settings
     Thread *PThread;
+    void IProcessLedLogic();
 public:
     void InitThread() { PThread = chThdSelf(); }
     Settings_t Settings;

@@ -193,7 +193,7 @@ void dbg_check_leave_isr(void) {
 void chDbgCheckClassI(void) {
 
   if ((dbg_isr_cnt < 0) || (dbg_lock_cnt <= 0))
-    chDbgPanic("SV#10");
+    chDbgPanic("SV#10: misplaced I-class function"); // @KL added description
 }
 
 /**
