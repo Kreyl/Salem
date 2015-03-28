@@ -18,6 +18,8 @@
 struct Settings_t {
     uint32_t DurationActive_s;
     uint32_t ID;
+    // Not saved
+    bool HasChanged;
 };
 // EEPROM addresses
 #define EE_ADDR     0

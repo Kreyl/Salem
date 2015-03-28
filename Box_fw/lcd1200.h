@@ -61,6 +61,7 @@ private:
     PwmPin_t BckLt;
     uint16_t IBuf[LCD_VIDEOBUF_SIZE];
     uint16_t CurrentPosition;   // x, y to place data to
+    Semaphore semLcd;
     // Pin driving functions
     void XRES_Hi() { PinSet  (LCD_GPIO, LCD_XRES); }
     void XRES_Lo() { PinClear(LCD_GPIO, LCD_XRES); }

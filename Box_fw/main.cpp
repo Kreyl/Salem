@@ -72,6 +72,7 @@ void App_t::ITask() {
                     case btnLTop:
                         if(Settings.ID < ID_MAX) {
                             Settings.ID++;
+                            Settings.HasChanged = true;
                             SaveSettings();
                             Interface.ShowID();
                         }
@@ -80,6 +81,7 @@ void App_t::ITask() {
                     case btnLBottom:
                         if(Settings.ID > ID_MIN) {
                             Settings.ID--;
+                            Settings.HasChanged = true;
                             SaveSettings();
                             Interface.ShowID();
                         }
@@ -88,6 +90,7 @@ void App_t::ITask() {
                     case btnRTop:
                         if(Settings.DurationActive_s < DURATION_ACTIVE_MAX_S) {
                             Settings.DurationActive_s += 10;
+                            Settings.HasChanged = true;
                             SaveSettings();
                             Interface.ShowDurationActive();
                         }
@@ -96,6 +99,7 @@ void App_t::ITask() {
                     case btnRBottom:
                         if(Settings.DurationActive_s > DURATION_ACTIVE_MIN_S) {
                             Settings.DurationActive_s -= 10;
+                            Settings.HasChanged = true;
                             SaveSettings();
                             Interface.ShowDurationActive();
                         }
@@ -168,6 +172,8 @@ void App_t::LoadSettings() {
 
     if(EE_PTR->ID < ID_MIN or EE_PTR->ID > ID_MAX) Settings.ID = ID_DEFAULT;
     else Settings.ID = EE_PTR->ID;
+
+    Settings.HasChanged = false;
 }
 
 void App_t::SaveSettings() {
@@ -191,7 +197,15 @@ void App_t::ISaveSettings() {
     }
     Flash_t::LockEE();
     chSysUnlock();
-    if(r == OK) Uart.Printf("\rSettings saved");
-    else Uart.Printf("\rSettings saving failure");
+    if(r == OK) {
+//        Uart.Printf("\rSettings saved");
+        Settings.HasChanged = false;
+        Interface.ShowID();
+        Interface.ShowDurationActive();
+    }
+    else {
+//        Uart.Printf("\rSettings saving failure");
+        Interface.Error("Save failure");
+    }
 }
 #endif

@@ -24,6 +24,7 @@
 #endif
 
 #include "main.h" // App.thd here
+#include "interface.h"
 #include "evt_mask.h"
 
 #define SNS_POLL_PERIOD_MS  72
@@ -49,17 +50,25 @@ extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);
 // Motion sensors handler
 static void ProcessMSensors(PinSnsState_t *PState, uint32_t Len) {
     // Send ON evt if any is rising
-    if(PState[0] == pssRising or PState[1] == pssRising) App.SignalEvt(EVTMSK_MSNS_ON);
+    if(PState[0] == pssRising or PState[1] == pssRising) {
+        App.SignalEvt(EVTMSK_MSNS_ON);
+        bool Sns2 = (PState[0] == pssRising) or (PState[0] == pssHi);
+        bool Sns1 = (PState[1] == pssRising) or (PState[1] == pssHi);
+        Interface.ShowMSns(Sns1, Sns2);
+    }
 
     // Send OFF evt if one is falling and other is low
     else if((PState[0] == pssFalling and PState[1] == pssLo) or
             (PState[1] == pssFalling and PState[0] == pssLo)
             ) {
+        bool Sns2 = (PState[0] == pssRising) or (PState[0] == pssHi);
+        bool Sns1 = (PState[1] == pssRising) or (PState[1] == pssHi);
+        Interface.ShowMSns(Sns1, Sns2);
         App.SignalEvt(EVTMSK_MSNS_OFF);
     }
 }
 
-#define BUTTONS_CNT     4       // Setup appropriately. Required for buttons handler
+#define BUTTONS_CNT     4   // Setup appropriately. Required for buttons handler
 
 const PinSns_t PinSns[] = {
         // Buttons

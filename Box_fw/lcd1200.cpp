@@ -73,6 +73,7 @@ void Lcd_t::Init(void) {
     // Start transmission
     XCS_Lo();
     dmaStreamEnable(LCD_DMA);
+    chSemInit(&semLcd, 1);
 }
 
 void Lcd_t::Shutdown(void) {
@@ -82,6 +83,7 @@ void Lcd_t::Shutdown(void) {
     SCLK_Lo();
     SDA_Lo();
     Backlight(0);
+    chSemReset(&semLcd, 1);
 }
 
 void Lcd_t::WriteCmd(uint8_t AByte) {
@@ -137,11 +139,15 @@ void Lcd_t::DrawChar(uint8_t AChar, Invert_t AInvert) {
 static inline void FLcdPutChar(char c) { Lcd.DrawChar(c, NotInverted); }
 
 void Lcd_t::Printf(const uint8_t x, const uint8_t y, const char *S, ...) {
-    GotoCharXY(x, y);
-    va_list args;
-    va_start(args, S);
-    kl_vsprintf(FLcdPutChar, 16, S, args);
-    va_end(args);
+    msg_t msg = chSemWait(&semLcd);
+    if(msg == RDY_OK) {
+        GotoCharXY(x, y);
+        va_list args;
+        va_start(args, S);
+        kl_vsprintf(FLcdPutChar, 16, S, args);
+        va_end(args);
+        chSemSignal(&semLcd);
+    }
 }
 
 // ================================ Graphics ===================================
