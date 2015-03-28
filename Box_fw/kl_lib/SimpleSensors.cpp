@@ -10,7 +10,7 @@
 SimpleSensors_t PinSensors;
 
 // ==== Sensors Thread ====
-static WORKING_AREA(waPinSnsThread, 128);
+static WORKING_AREA(waPinSnsThread, 256);
 __attribute__((noreturn))
 static void SensorsThread(void *arg) {
     chRegSetThreadName("PinSensors");

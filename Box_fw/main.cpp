@@ -43,7 +43,6 @@ int main(void) {
     App.InitThread();
 
     Lcd.Init();
-    Lcd.Backlight(50);
     App.LoadSettings();
     Interface.Reset();
 
@@ -68,6 +67,10 @@ void App_t::ITask() {
             while(ButtonEvtBuf.Get(&EInfo) == OK) {
 //                Uart.Printf("\rEinfo: %u, %u,  %A", EInfo.Type, EInfo.BtnCnt, EInfo.BtnID, EInfo.BtnCnt, '-');
                 Beeper.StartSequence(bsqButton);
+                // Switch backlight on
+                Lcd.Backlight(81);
+                chVTRestart(&ITmrBacklight, MS2ST(4500), EVTMSK_BCKLT_OFF);
+                // Process buttons
                 switch(EInfo.BtnID[0]) {
                     case btnLTop:
                         if(Settings.ID < ID_MAX) {
@@ -150,6 +153,10 @@ void App_t::ITask() {
 #if 1 // ==== Saving settings ====
         if(EvtMsk & EVTMSK_SAVE) { ISaveSettings(); }
 #endif
+
+#if 1 // ==== Backlight off ====
+        if(EvtMsk & EVTMSK_BCKLT_OFF) { Lcd.Backlight(0); }
+#endif
     } // while true
 }
 
@@ -179,7 +186,7 @@ void App_t::LoadSettings() {
 void App_t::SaveSettings() {
     chSysLock();
     if(chVTIsArmedI(&ITmrSaving)) chVTResetI(&ITmrSaving);  // Reset timer
-    chVTSetEvtI(&ITmrSaving, MS2ST(4500), EVTMSK_SAVE);
+    chVTSetEvtI(&ITmrSaving, S2ST(4), EVTMSK_SAVE);
     chSysUnlock();
 }
 

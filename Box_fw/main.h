@@ -39,7 +39,7 @@ struct Settings_t {
 class App_t {
 private:
     bool RadioIsOn, LedBySnsMustBeOn;
-    VirtualTimer ITmrSaving, ITmrMSnsTimeout, ITmrRadioTimeout;
+    VirtualTimer ITmrSaving, ITmrMSnsTimeout, ITmrRadioTimeout, ITmrBacklight;
     void ISaveSettings();    // Really save settings
     Thread *PThread;
     void IProcessLedLogic();
