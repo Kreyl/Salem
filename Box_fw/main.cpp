@@ -138,7 +138,7 @@ void App_t::ITask() {
 
 #if 1 // ==== Radio ====
         if(EvtMsk & EVTMSK_RADIO_RX) {
-            Uart.Printf("\rRadioRx");
+//            Uart.Printf("\rRadioRx");
             RadioIsOn = true;
             chVTRestart(&ITmrRadioTimeout, S2ST(RADIO_NOPKT_TIMEOUT_S), EVTMSK_RADIO_ON_TIMEOUT);
             IProcessLedLogic();
