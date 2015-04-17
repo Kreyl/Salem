@@ -72,28 +72,25 @@ void App_t::ITask() {
                 chVTRestart(&ITmrBacklight, MS2ST(4500), EVTMSK_BCKLT_OFF);
                 // Process buttons
                 switch(EInfo.BtnID[0]) {
-                    case btnLTop:
-                        if(Settings.ID < ID_MAX) {
-                            Settings.ID++;
-                            Settings.HasChanged = true;
-                            SaveSettings();
-                            Interface.ShowID();
-                        }
+                    case btnLTop:   // Iterate IDs
+                        if(Settings.ID < ID_MAX) Settings.ID++;
+                        else Settings.ID = ID_MIN;
+                        SettingsHasChanged = true;
+                        SaveSettings();
+                        Interface.ShowID();
                         break;
 
-                    case btnLBottom:
-                        if(Settings.ID > ID_MIN) {
-                            Settings.ID--;
-                            Settings.HasChanged = true;
-                            SaveSettings();
-                            Interface.ShowID();
-                        }
+                    case btnLBottom: // Deadtime on/off
+                        Settings.DeadtimeEnabled = !Settings.DeadtimeEnabled;
+                        SettingsHasChanged = true;
+                        SaveSettings();
+                        Interface.ShowDeadtimeSettings();
                         break;
 
                     case btnRTop:
                         if(Settings.DurationActive_s < DURATION_ACTIVE_MAX_S) {
                             Settings.DurationActive_s += 10;
-                            Settings.HasChanged = true;
+                            SettingsHasChanged = true;
                             SaveSettings();
                             Interface.ShowDurationActive();
                         }
@@ -102,7 +99,7 @@ void App_t::ITask() {
                     case btnRBottom:
                         if(Settings.DurationActive_s > DURATION_ACTIVE_MIN_S) {
                             Settings.DurationActive_s -= 10;
-                            Settings.HasChanged = true;
+                            SettingsHasChanged = true;
                             SaveSettings();
                             Interface.ShowDurationActive();
                         }
@@ -130,8 +127,15 @@ void App_t::ITask() {
         }
         // Timeout after Msns off: sensors were off some time ago
         if(EvtMsk & EVTMSK_MSNS_AFTEROFF_TIMEOUT) {
-            Uart.Printf("\rMSns timeout");
+            Uart.Printf("\rMSns afteroff delay end");
             LedBySnsMustBeOn = false;
+            // Start DeadTime delay after sensors off
+            if(DeadTimeEnabled) {
+                Uart.Printf("\rDeadTime started");
+                DeadTimeIsNow = true;
+                Interface.ShowDeadtime();
+                chVTRestart(&ITmrDeadTime, S2ST(DURATION_DEADTIME_S), EVTMSK_DEADTIME_END);
+            }
             IProcessLedLogic();
         }
 #endif
@@ -140,18 +144,32 @@ void App_t::ITask() {
         if(EvtMsk & EVTMSK_RADIO_RX) {
 //            Uart.Printf("\rRadioRx");
             RadioIsOn = true;
+            Interface.ShowRadio();
             chVTRestart(&ITmrRadioTimeout, S2ST(RADIO_NOPKT_TIMEOUT_S), EVTMSK_RADIO_ON_TIMEOUT);
             IProcessLedLogic();
+            // Radio RX disables Deadtime if it is on
+            DeadTimeIsNow = false;
+            chVTReset(&ITmrDeadTime);
         }
         if(EvtMsk & EVTMSK_RADIO_ON_TIMEOUT) {
-            Uart.Printf("\rRadioTimeout");
+//            Uart.Printf("\rRadioTimeout");
             RadioIsOn = false;
+            Interface.ShowRadio();
+            IProcessLedLogic();
+        }
+#endif
+
+#if 1 // ==== DeadTime ====
+        if(EvtMsk & EVTMSK_DEADTIME_END) {
+            Uart.Printf("\rDeadTime ended");
+            DeadTimeIsNow = false;
+            Interface.ShowDeadtime();
             IProcessLedLogic();
         }
 #endif
 
 #if 1 // ==== Saving settings ====
-        if(EvtMsk & EVTMSK_SAVE) { ISaveSettings(); }
+        if(EvtMsk & EVTMSK_SAVE) { ISaveSettingsReally(); }
 #endif
 
 #if 1 // ==== Backlight off ====
@@ -161,15 +179,15 @@ void App_t::ITask() {
 }
 
 void App_t::IProcessLedLogic() {
-    if(LedBySnsMustBeOn) {
-        if(RadioIsOn) Led.StartSequence(lsqEnterIdle);
-        else          Led.StartSequence(lsqEnterActive);
-    }
+    if(LedBySnsMustBeOn and !RadioIsOn and !DeadTimeIsNow) Led.StartSequence(lsqEnterActive);
     else Led.StartSequence(lsqEnterIdle);
 }
 
 #if 1 // ===================== Load/save settings ==============================
 void App_t::LoadSettings() {
+    if(EE_PTR->ID < ID_MIN or EE_PTR->ID > ID_MAX) Settings.ID = ID_DEFAULT;
+    else Settings.ID = EE_PTR->ID;
+
     if(EE_PTR->DurationActive_s < DURATION_ACTIVE_MIN_S or
        EE_PTR->DurationActive_s > DURATION_ACTIVE_MAX_S
        ) {
@@ -177,10 +195,9 @@ void App_t::LoadSettings() {
     }
     else Settings.DurationActive_s = EE_PTR->DurationActive_s;
 
-    if(EE_PTR->ID < ID_MIN or EE_PTR->ID > ID_MAX) Settings.ID = ID_DEFAULT;
-    else Settings.ID = EE_PTR->ID;
+    Settings.DeadtimeEnabled = EE_PTR->DeadtimeEnabled;
 
-    Settings.HasChanged = false;
+    SettingsHasChanged = false;
 }
 
 void App_t::SaveSettings() {
@@ -190,28 +207,28 @@ void App_t::SaveSettings() {
     chSysUnlock();
 }
 
-void App_t::ISaveSettings() {
+void App_t::ISaveSettingsReally() {
     Flash_t::UnlockEE();
     chSysLock();
-    uint8_t r = Flash_t::WaitForLastOperation();
-    if(r == OK) {
-        EE_PTR->DurationActive_s = Settings.DurationActive_s;
+    uint8_t r = OK;
+    uint32_t *Src = (uint32_t*)&Settings;
+    uint32_t *Dst = (uint32_t*)EE_PTR;
+    for(uint32_t i=0; i<SETTINGS_SZ32; i++) {
         r = Flash_t::WaitForLastOperation();
-        if(r == OK) {
-            EE_PTR->ID = Settings.ID;
-            r = Flash_t::WaitForLastOperation();
-        }
+        if(r != OK) break;
+        *Dst++ = *Src++;
     }
     Flash_t::LockEE();
     chSysUnlock();
     if(r == OK) {
-//        Uart.Printf("\rSettings saved");
-        Settings.HasChanged = false;
+        Uart.Printf("\rSettings saved");
+        SettingsHasChanged = false;
         Interface.ShowID();
         Interface.ShowDurationActive();
+        Interface.ShowDeadtimeSettings();
     }
     else {
-//        Uart.Printf("\rSettings saving failure");
+        Uart.Printf("\rSettings saving failure");
         Interface.Error("Save failure");
     }
 }

@@ -166,6 +166,15 @@ void Lcd_t::DrawImage(const uint8_t x, const uint8_t y, const uint8_t* Img) {
     } // fy
 }
 
+/* Composition of symbols must be terminated with '0'.
+ * Example:
+ * Lcd.Symbols(0, 4,
+        LineHorizDouble, 7,
+        LineHorizDoubleDown, 1,
+        LineHorizDouble, 8,
+        0);
+        Lcd.Symbols(7, 6, LineVertDouble, 1, 0);
+ */
 void Lcd_t::Symbols(const uint8_t x, const uint8_t y, ...) {
     GotoCharXY(x, y);
     uint8_t FCharCode=1, RepeatCount;

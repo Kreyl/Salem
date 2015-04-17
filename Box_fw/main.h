@@ -15,34 +15,40 @@
 #include "evt_mask.h"
 #include "uart.h"
 
+// All values must be 32bit to make things easier
 struct Settings_t {
-    uint32_t DurationActive_s;
     uint32_t ID;
-    // Not saved
-    bool HasChanged;
+    uint32_t DurationActive_s;
+    union {
+        uint32_t dummy32;   // force bool being 32-bit
+        bool DeadtimeEnabled;
+    };
 };
+#define SETTINGS_SZ32   (sizeof(Settings_t) / 4)
 // EEPROM addresses
 #define EE_ADDR     0
 #define EE_PTR      ((Settings_t*)(EEPROM_BASE_ADDR + EE_ADDR))
 
-// ID and active duration
+// ==== Constants and default values ====
 #define DURATION_ACTIVE_MIN_S   10
 #define DURATION_ACTIVE_MAX_S   9990
 #define DURATION_ACTIVE_DEFAULT 300
 #define ID_MIN                  1
 #define ID_MAX                  18
 #define ID_DEFAULT              ID_MIN
+#define DURATION_DEADTIME_S     90
 
 // Radio timing
 #define RADIO_NOPKT_TIMEOUT_S   4
 
 class App_t {
 private:
-    bool RadioIsOn, LedBySnsMustBeOn;
-    VirtualTimer ITmrSaving, ITmrMSnsTimeout, ITmrRadioTimeout, ITmrBacklight;
-    void ISaveSettings();    // Really save settings
+    bool RadioIsOn, LedBySnsMustBeOn, DeadTimeIsNow, DeadTimeEnabled;
+    VirtualTimer ITmrSaving, ITmrMSnsTimeout, ITmrRadioTimeout, ITmrBacklight, ITmrDeadTime;
+    void ISaveSettingsReally();    // Really save settings
     Thread *PThread;
     void IProcessLedLogic();
+    bool SettingsHasChanged;
 public:
     void InitThread() { PThread = chThdSelf(); }
     Settings_t Settings;
@@ -57,6 +63,7 @@ public:
     // Inner use
     void ITask();
 //    App_t(): State(bsIdle), PThread(nullptr) {}
+    friend class Interface_t;
 };
 
 extern App_t App;
