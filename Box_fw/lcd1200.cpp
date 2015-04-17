@@ -137,6 +137,7 @@ void Lcd_t::DrawChar(uint8_t AChar, Invert_t AInvert) {
 }
 
 static inline void FLcdPutChar(char c) { Lcd.DrawChar(c, NotInverted); }
+static inline void FLcdPutCharInverted(char c) { Lcd.DrawChar(c, Inverted); }
 
 void Lcd_t::Printf(const uint8_t x, const uint8_t y, const char *S, ...) {
     msg_t msg = chSemWait(&semLcd);
@@ -145,6 +146,18 @@ void Lcd_t::Printf(const uint8_t x, const uint8_t y, const char *S, ...) {
         va_list args;
         va_start(args, S);
         kl_vsprintf(FLcdPutChar, 16, S, args);
+        va_end(args);
+        chSemSignal(&semLcd);
+    }
+}
+
+void Lcd_t::PrintfInverted(const uint8_t x, const uint8_t y, const char *S, ...) {
+    msg_t msg = chSemWait(&semLcd);
+    if(msg == RDY_OK) {
+        GotoCharXY(x, y);
+        va_list args;
+        va_start(args, S);
+        kl_vsprintf(FLcdPutCharInverted, 16, S, args);
         va_end(args);
         chSemSignal(&semLcd);
     }

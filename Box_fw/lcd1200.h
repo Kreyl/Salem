@@ -84,6 +84,7 @@ public:
     void GotoCharXY(uint8_t x, uint8_t y) { CurrentPosition =  x*6 + y*96; }
     void DrawChar(uint8_t AChar, Invert_t AInvert);
     void Printf(const uint8_t x, const uint8_t y, const char *S, ...);
+    void PrintfInverted(const uint8_t x, const uint8_t y, const char *S, ...);
 #ifdef LCD_LARGEFONTS_H_
     void PrintfFont(const uint8_t *PFont, uint8_t x, uint8_t y, const char *S, ...);
 #endif

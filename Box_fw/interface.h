@@ -25,6 +25,7 @@ public:
         ShowRadio();
         ShowDeadtimeSettings();
         ShowDeadtime();
+        ShowLedOff();
     }
     // Settings
     void ShowDurationActive() {
@@ -44,15 +45,17 @@ public:
 
     // Status line
     void ShowMSns(bool Sns1, bool Sns2) {
-        if(Sns1) Lcd.Printf(0,  6, "Sns1"); else Lcd.Printf(0,  6, "S1--");
-        if(Sns2) Lcd.Printf(11, 6, "Sns2"); else Lcd.Printf(11, 6, "S2--");
+        if(Sns1) Lcd.PrintfInverted(0,  6, "Sns1"); else Lcd.Printf(0,  6, "Sns1");
+        if(Sns2) Lcd.PrintfInverted(11, 6, "Sns2"); else Lcd.Printf(11, 6, "Sns2");
     }
     void ShowRadio() {
-        if(App.RadioIsOn) Lcd.Printf(0, 7, "Radio"); else Lcd.Printf(0, 7, "R----");
+        if(App.RadioIsOn) Lcd.PrintfInverted(0, 7, "Radio"); else Lcd.Printf(0, 7, "Radio");
     }
     void ShowDeadtime() {
-        if(App.DeadTimeIsNow) Lcd.Printf(11, 7, "DeadT"); else Lcd.Printf(11, 7, "D----");
+        if(App.DeadTimeIsNow) Lcd.PrintfInverted(11, 7, "DeadT"); else Lcd.Printf(11, 7, "DeadT");
     }
+    void ShowLedOn()  { Lcd.PrintfInverted(6, 6, "Out"); }
+    void ShowLedOff() { Lcd.Printf(6, 6, "Out"); }
 
     void Error(const char* msg) { Lcd.Printf(0, 7, "%S", msg); }
 };

@@ -130,7 +130,7 @@ void App_t::ITask() {
             Uart.Printf("\rMSns afteroff delay end");
             LedBySnsMustBeOn = false;
             // Start DeadTime delay after sensors off
-            if(DeadTimeEnabled) {
+            if(Settings.DeadtimeEnabled) {
                 Uart.Printf("\rDeadTime started");
                 DeadTimeIsNow = true;
                 Interface.ShowDeadtime();
@@ -179,8 +179,14 @@ void App_t::ITask() {
 }
 
 void App_t::IProcessLedLogic() {
-    if(LedBySnsMustBeOn and !RadioIsOn and !DeadTimeIsNow) Led.StartSequence(lsqEnterActive);
-    else Led.StartSequence(lsqEnterIdle);
+    if(LedBySnsMustBeOn and !RadioIsOn and !DeadTimeIsNow) {
+        Led.StartSequence(lsqEnterActive);
+        Interface.ShowLedOn();
+    }
+    else {
+        Led.StartSequence(lsqEnterIdle);
+        Interface.ShowLedOff();
+    }
 }
 
 #if 1 // ===================== Load/save settings ==============================
