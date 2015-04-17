@@ -15,6 +15,8 @@
 #include "evt_mask.h"
 #include "uart.h"
 
+#define VERSION_STRING  "v1.0"
+
 // All values must be 32bit to make things easier
 struct Settings_t {
     uint32_t ID;
