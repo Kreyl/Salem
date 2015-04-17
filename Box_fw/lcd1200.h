@@ -72,7 +72,6 @@ private:
     void XCS_Hi () { PinSet  (LCD_GPIO, LCD_XCS);  }
     void XCS_Lo () { PinClear(LCD_GPIO, LCD_XCS);  }
     void WriteCmd(uint8_t ACmd);
-    void WriteData(uint8_t AData);
     // High-level
     void GotoXY(uint8_t x, uint8_t y) { CurrentPosition =  x + y*96; }
 public:
@@ -92,6 +91,8 @@ public:
     void DrawImage(const uint8_t x, const uint8_t y, const uint8_t *Img);
     // Symbols printing
     void Symbols(const uint8_t x, const uint8_t y, ...);
+    // Constructor
+    Lcd_t(): CurrentPosition(0), Brightness(0) { for(uint32_t i=0; i<LCD_VIDEOBUF_SIZE; i++) IBuf[i] = 0; }
 };
 
 extern Lcd_t Lcd;

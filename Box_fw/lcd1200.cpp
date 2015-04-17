@@ -103,33 +103,14 @@ void Lcd_t::WriteCmd(uint8_t AByte) {
     }
     XCS_Hi();
 }
-void Lcd_t::WriteData(uint8_t AByte) {
-    SCLK_Lo();
-    XCS_Lo();   // Select chip
-    // Send "Data" bit
-    SDA_Hi();
-    SCLK_Hi();
-    SCLK_Lo();
-    // Send byte
-    for(uint8_t i=0; i<8; i++) {
-        if(AByte & 0x80) SDA_Hi();
-        else SDA_Lo();
-        SCLK_Hi();
-        SCLK_Lo();
-        AByte <<= 1;
-    }
-    XCS_Hi();
-}
 
 // ================================= Printf ====================================
 // Prints char at current buf indx
 void Lcd_t::DrawChar(uint8_t AChar, Invert_t AInvert) {
-    uint8_t b;
-    uint16_t w;
     for(uint8_t i=0; i<6; i++) {
-        b = Font_6x8_Data[AChar][i];
+        uint8_t b = Font_6x8_Data[AChar][i];
         if(AInvert == Inverted) b = ~b;
-        w = b;
+        uint16_t w = b;
         w = (w << 1) | 0x0001;
         IBuf[CurrentPosition++] = w;
         if(CurrentPosition >= LCD_VIDEOBUF_SIZE) CurrentPosition = 0;
@@ -190,13 +171,12 @@ void Lcd_t::DrawImage(const uint8_t x, const uint8_t y, const uint8_t* Img) {
  */
 void Lcd_t::Symbols(const uint8_t x, const uint8_t y, ...) {
     GotoCharXY(x, y);
-    uint8_t FCharCode=1, RepeatCount;
     va_list Arg;
     va_start(Arg, y);    // Set pointer to last argument
-    while(1) {
-        FCharCode = (uint8_t)va_arg(Arg, int32_t);
+    while(true) {
+        uint8_t FCharCode = (uint8_t)va_arg(Arg, int32_t);
         if(FCharCode == 0) break;
-        RepeatCount = (uint8_t)va_arg(Arg, int32_t);
+        uint8_t RepeatCount = (uint8_t)va_arg(Arg, int32_t);
         for(uint8_t j=0; j<RepeatCount; j++) DrawChar(FCharCode, NotInverted);
     }
     va_end(Arg);

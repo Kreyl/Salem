@@ -33,8 +33,8 @@ public:
         else Lcd.Printf(9, 4, "%u s ", App.Settings.DurationActive_s);
     }
     void ShowID() {
-        if(App.SettingsHasChanged) Lcd.Printf(0, 1, "ID=%02u*", App.Settings.ID);
-        else Lcd.Printf(0, 1, "ID=%02u ", App.Settings.ID);
+        if(App.SettingsHasChanged) Lcd.Printf(0, 0, "ID=%02u*", App.Settings.ID);
+        else Lcd.Printf(0, 0, "ID=%02u ", App.Settings.ID);
     }
     void ShowDeadtimeSettings() {
         char c = App.SettingsHasChanged? '*' : ' ';

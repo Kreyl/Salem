@@ -146,9 +146,9 @@ void chDbgPanic(const char *msg1) {
 void i2cDmaIrqHandler(void *p, uint32_t flags) {
     chSysLockFromIsr();
     //Uart.Printf("===T===");
-    Thread *PThd = ((i2c_t*)p)->PRequestingThread;
+    Thread *PThd = reinterpret_cast<i2c_t*>(p)->PRequestingThread;
     if (PThd != NULL) {
-        ((i2c_t*)p)->PRequestingThread = NULL;
+        reinterpret_cast<i2c_t*>(p)->PRequestingThread = NULL;
         chSchReadyI(PThd);
     }
     chSysUnlockFromIsr();

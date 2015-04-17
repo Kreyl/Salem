@@ -147,10 +147,9 @@ void cc1101_t::WriteTX(uint8_t* Ptr, uint8_t Length) {
     CsLo();                                                     // Start transmission
     BusyWait();                                                 // Wait for chip to become ready
     ISpi.ReadWriteByte(CC_FIFO|CC_WRITE_FLAG|CC_BURST_FLAG);    // Address with write & burst flags
-    uint8_t b;
     //Uart.Printf("TX: ");
     for(uint8_t i=0; i<Length; i++) {
-        b = *Ptr++;
+        uint8_t b = *Ptr++;
         ISpi.ReadWriteByte(b);  // Write bytes
       //  Uart.Printf("%X ", b);
     }

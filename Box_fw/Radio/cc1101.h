@@ -29,8 +29,6 @@ private:
     PinIrq_t IGdo0;
     void CsHi() { PinSet(CC_GPIO, CC_CS); }
     void CsLo() { PinClear(CC_GPIO, CC_CS); }
-    bool GDO0IsHi() { return PinIsSet(CC_GPIO, CC_GDO0); }
-    bool GDO2IsHi() { return PinIsSet(CC_GPIO, CC_GDO2); }
     void BusyWait() { while(PinIsSet(CC_GPIO, CC_MISO)); }
     // General
     void RfConfig();
@@ -43,8 +41,6 @@ private:
     // Strobes
     void CReset()      { WriteStrobe(CC_SRES); }
     void EnterTX()     { WriteStrobe(CC_STX);  }
-    void FlushTxFIFO() { WriteStrobe(CC_SFTX); }
-    void GetState()    { WriteStrobe(CC_SNOP); }
     void EnterRX()     { WriteStrobe(CC_SRX);  }
     void FlushRxFIFO() { WriteStrobe(CC_SFRX); }
 public:
@@ -65,6 +61,7 @@ public:
     uint8_t ReadFIFO(void *Ptr, int8_t *PRssi);
     // Inner use
     void IGdo0IrqHandler();
+    cc1101_t(): IState(0), PWaitingThread(nullptr), IPktSz(0) {}
 };
 
 extern cc1101_t CC;

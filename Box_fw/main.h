@@ -27,7 +27,7 @@ struct Settings_t {
 #define SETTINGS_SZ32   (sizeof(Settings_t) / 4)
 // EEPROM addresses
 #define EE_ADDR     0
-#define EE_PTR      ((Settings_t*)(EEPROM_BASE_ADDR + EE_ADDR))
+#define EE_PTR      (reinterpret_cast<Settings_t*>(EEPROM_BASE_ADDR + EE_ADDR))
 
 // ==== Constants and default values ====
 #define DURATION_ACTIVE_MIN_S   10
@@ -62,7 +62,9 @@ public:
     void SignalEvtI(eventmask_t Evt) { chEvtSignalI(PThread, Evt); }
     // Inner use
     void ITask();
-//    App_t(): State(bsIdle), PThread(nullptr) {}
+    App_t(): RadioIsOn(false), LedBySnsMustBeOn(false), DeadTimeIsNow(false),
+            PThread(nullptr), SettingsHasChanged(false),
+            Settings({ID_MIN, DURATION_ACTIVE_MIN_S, false}) {}
     friend class Interface_t;
 };
 
