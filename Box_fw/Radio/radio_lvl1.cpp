@@ -10,6 +10,7 @@
 #include "main.h"
 #include "cc1101.h"
 #include "uart.h"
+#include "interface.h"
 
 #define DBG_PINS
 
@@ -101,6 +102,9 @@ void rLevel1_t::Init() {
 #endif
 //        Uart.Printf("\rCC init OK");
     }
-    else Uart.Printf("\rCC init error");
+    else {
+        Uart.Printf("\rCC init error");
+        Interface.Error("  Radio Failure ");
+    }
 }
 #endif

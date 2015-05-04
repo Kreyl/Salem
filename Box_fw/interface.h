@@ -58,7 +58,7 @@ public:
     void ShowLedOn()  { Lcd.PrintfInverted(6, 6, "Out"); }
     void ShowLedOff() { Lcd.Printf(6, 6, "Out"); }
 
-    void Error(const char* msg) { Lcd.Printf(0, 7, "%S", msg); }
+    void Error(const char* msg) { Lcd.PrintfInverted(0, 2, "%S", msg); }
 };
 
 extern Interface_t Interface;
