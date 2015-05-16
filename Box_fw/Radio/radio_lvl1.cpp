@@ -75,7 +75,7 @@ __attribute__((__noreturn__)) void rLevel1_t::ITask() {
 #if 1 // ============ RX cycle ============
         uint8_t RxRslt;
         CC.SetChannel(ID2RCHNL(App.Settings.ID));
-        RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt);
+        RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &LastRssidB);
         if(RxRslt == OK) {
 //            Uart.Printf("\rRx ID=%u; TestWord=%X", Pkt.ID, Pkt.TestWord);
             if(Pkt.TestWord == TEST_WORD and Pkt.ID == App.Settings.ID) {

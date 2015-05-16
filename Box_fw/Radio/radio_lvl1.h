@@ -17,6 +17,7 @@ class rLevel1_t {
 private:
     rPkt_t Pkt;
 public:
+    int8_t LastRssidB;
     void Init();
     // Inner use
     void ITask();
