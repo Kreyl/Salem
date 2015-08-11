@@ -1,5 +1,4 @@
-kl_lib/uart.o: ../kl_lib/uart.cpp ../kl_lib/uart.h ../os/hal/stm32l1xx.h \
- ../os/hal/core_cm3.h ../os/hal/core_cmInstr.h ../os/hal/core_cmFunc.h \
+kl_lib/uart.o: ../kl_lib/uart.cpp ../kl_lib/uart.h ../kl_lib/kl_lib.h \
  ../os/kernel/include/ch.h ../os/chconf.h ../os/hal/chtypes.h \
  ../os/kernel/include/chlists.h ../os/hal/chcore.h ../os/hal/cmparams.h \
  ../os/hal/chcore_v7m.h ../os/hal/nvic.h ../os/kernel/include/chsys.h \
@@ -14,19 +13,15 @@ kl_lib/uart.o: ../kl_lib/uart.cpp ../kl_lib/uart.h ../os/hal/stm32l1xx.h \
  ../os/kernel/include/chqueues.h ../os/kernel/include/chstreams.h \
  ../os/kernel/include/chfiles.h ../os/kernel/include/chdebug.h \
  ../os/hal/hal.h ../os/halconf.h ../os/mcuconf.h ../os/hal/hal_lld.h \
- ../os/hal/stm32.h ../os/hal/stm32l1xx.h ../os/hal/stm32_dma.h \
- ../os/hal/stm32_rcc.h ../kl_lib/kl_sprintf.h ../kl_lib/kl_lib_L15x.h \
- ../kl_lib/clocking_L1xx.h ../kl_lib/cmd.h
+ ../os/hal/stm32.h ../os/hal/stm32l1xx.h ../os/hal/core_cm3.h \
+ ../os/hal/core_cmInstr.h ../os/hal/core_cmFunc.h ../os/hal/stm32_dma.h \
+ ../os/hal/stm32_rcc.h ../kl_lib/clocking.h ../os/mcuconf.h \
+ ../os/hal/stm32l1xx.h ../kl_lib/kl_sprintf.h ../kl_lib/cmd.h .././main.h \
+ ../kl_lib/clocking.h .././evt_mask.h ../kl_lib/uart.h
 
 ../kl_lib/uart.h:
 
-../os/hal/stm32l1xx.h:
-
-../os/hal/core_cm3.h:
-
-../os/hal/core_cmInstr.h:
-
-../os/hal/core_cmFunc.h:
+../kl_lib/kl_lib.h:
 
 ../os/kernel/include/ch.h:
 
@@ -98,14 +93,30 @@ kl_lib/uart.o: ../kl_lib/uart.cpp ../kl_lib/uart.h ../os/hal/stm32l1xx.h \
 
 ../os/hal/stm32l1xx.h:
 
+../os/hal/core_cm3.h:
+
+../os/hal/core_cmInstr.h:
+
+../os/hal/core_cmFunc.h:
+
 ../os/hal/stm32_dma.h:
 
 ../os/hal/stm32_rcc.h:
 
+../kl_lib/clocking.h:
+
+../os/mcuconf.h:
+
+../os/hal/stm32l1xx.h:
+
 ../kl_lib/kl_sprintf.h:
 
-../kl_lib/kl_lib_L15x.h:
-
-../kl_lib/clocking_L1xx.h:
-
 ../kl_lib/cmd.h:
+
+.././main.h:
+
+../kl_lib/clocking.h:
+
+.././evt_mask.h:
+
+../kl_lib/uart.h:

@@ -22,7 +22,8 @@ public:
         Lcd.Symbols(0, 2, LineHorizDouble, 6, 0);
         ShowDurationActive();
         ShowID();
-        ShowMSns(0, 0);
+        ShowMSns1(0);
+        ShowMSns2(0);
         ShowRadio();
         ShowDeadtimeSettings();
         ShowDeadtime();
@@ -45,10 +46,8 @@ public:
     }
 
     // Status line
-    void ShowMSns(bool Sns1, bool Sns2) {
-        if(Sns1) Lcd.PrintfInverted(0,  6, "Sns1"); else Lcd.Printf(0,  6, "Sns1");
-        if(Sns2) Lcd.PrintfInverted(11, 6, "Sns2"); else Lcd.Printf(11, 6, "Sns2");
-    }
+    void ShowMSns1(bool Sns) { if(Sns) Lcd.PrintfInverted(0,  6, "Sns1"); else Lcd.Printf(0,  6, "Sns1"); }
+    void ShowMSns2(bool Sns) { if(Sns) Lcd.PrintfInverted(11, 6, "Sns2"); else Lcd.Printf(11, 6, "Sns2"); }
     void ShowRadio() {
         if(App.RadioIsOn) Lcd.PrintfInverted(0, 7, "Radio"); else Lcd.Printf(0, 7, "Radio");
     }

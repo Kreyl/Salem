@@ -9,7 +9,7 @@
 #define	LCD110X_H
 
 #include "stm32l1xx.h"
-#include "kl_lib_L15x.h"
+#include "kl_lib.h"
 #include "lcd_LargeFonts.h"
 
 #if 1 // ========================== GPIO etc ===================================
@@ -58,7 +58,7 @@ enum Invert_t {NotInverted, Inverted};
 
 class Lcd_t {
 private:
-    PwmPin_t BckLt;
+    PinOutputPWM_t<LCD_TOP_BRIGHTNESS, invNotInverted, omPushPull> BckLt{LCD_BCKLT_GPIO, LCD_BCKLT_PIN, LCD_BCKLT_TMR, LCD_BCKLT_CHNL};
     uint16_t IBuf[LCD_VIDEOBUF_SIZE];
     uint16_t CurrentPosition;   // x, y to place data to
     Semaphore semLcd;

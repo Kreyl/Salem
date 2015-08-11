@@ -20,8 +20,8 @@ Beeper_t Beeper;
 LedSmooth_t Led({GPIOB, 4, TIM3, 1});
 Interface_t Interface;
 
-// Universal VirtualTimer callback
-void TmrGeneralCallback(void *p) {
+// Universal VirtualTimer one-shot callback
+void TmrOneShotCallback(void *p) {
     chSysLockFromIsr();
     App.SignalEvtI((eventmask_t)p);
     chSysUnlockFromIsr();
@@ -38,7 +38,7 @@ int main(void) {
 
     // ==== Init Hard & Soft ====
     Uart.Init(115200);
-    Uart.Printf("\rSalemBox AHB=%u", Clk.AHBFreqHz);
+    Uart.Printf("\rSalemBox %S AHB=%u", VERSION_STRING, Clk.AHBFreqHz);
 
     App.InitThread();
 
@@ -204,13 +204,6 @@ void App_t::LoadSettings() {
     Settings.DeadtimeEnabled = EE_PTR->DeadtimeEnabled;
 
     SettingsHasChanged = false;
-}
-
-void App_t::SaveSettings() {
-    chSysLock();
-    if(chVTIsArmedI(&ITmrSaving)) chVTResetI(&ITmrSaving);  // Reset timer
-    chVTSetEvtI(&ITmrSaving, S2ST(4), EVTMSK_SAVE);
-    chSysUnlock();
 }
 
 void App_t::ISaveSettingsReally() {

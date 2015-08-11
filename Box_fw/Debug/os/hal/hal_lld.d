@@ -15,7 +15,8 @@ os/hal/hal_lld.o: ../os/hal/hal_lld.cpp ../os/kernel/include/ch.h \
  ../os/hal/hal.h ../os/halconf.h ../os/mcuconf.h ../os/hal/hal_lld.h \
  ../os/hal/stm32.h ../os/hal/stm32l1xx.h ../os/hal/core_cm3.h \
  ../os/hal/core_cmInstr.h ../os/hal/core_cmFunc.h ../os/hal/stm32_dma.h \
- ../os/hal/stm32_rcc.h ../kl_lib/clocking_L1xx.h ../os/hal/stm32l1xx.h
+ ../os/hal/stm32_rcc.h ../kl_lib/clocking.h ../os/mcuconf.h \
+ ../os/hal/stm32l1xx.h
 
 ../os/kernel/include/ch.h:
 
@@ -97,6 +98,8 @@ os/hal/hal_lld.o: ../os/hal/hal_lld.cpp ../os/kernel/include/ch.h \
 
 ../os/hal/stm32_rcc.h:
 
-../kl_lib/clocking_L1xx.h:
+../kl_lib/clocking.h:
+
+../os/mcuconf.h:
 
 ../os/hal/stm32l1xx.h:

@@ -17,12 +17,7 @@
 
 #include "ch.h"
 #include "hal.h"
-#ifdef STM32F2XX
-#include "kl_lib_f2xx.h"
-#elif defined STM32L1XX_MD || defined STM32L1XX_HD
-#include "kl_lib_L15x.h"
-#endif
-
+#include "kl_lib.h"
 #include "main.h" // App.thd here
 #include "interface.h"
 #include "evt_mask.h"
@@ -49,21 +44,19 @@ extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);
 
 // Motion sensors handler
 static void ProcessMSensors(PinSnsState_t *PState, uint32_t Len) {
-    // Send ON evt if any is rising
-    if(PState[0] == pssRising or PState[1] == pssRising) {
-        App.SignalEvt(EVTMSK_MSNS_ON);
-        bool Sns2 = (PState[0] == pssRising) or (PState[0] == pssHi);
-        bool Sns1 = (PState[1] == pssRising) or (PState[1] == pssHi);
-        Interface.ShowMSns(Sns1, Sns2);
-    }
+    // Display status
+    if(PState[0] == pssRising) Interface.ShowMSns1(1);
+    else if(PState[0] == pssFalling) Interface.ShowMSns1(0);
+    if(PState[1] == pssRising) Interface.ShowMSns2(1);
+    else if(PState[1] == pssFalling) Interface.ShowMSns2(0);
 
+    // Send ON evt if any is rising
+    if(PState[0] == pssRising or PState[1] == pssRising) App.SignalEvt(EVTMSK_MSNS_ON);
     // Send OFF evt if one is falling and other is low
     else if((PState[0] == pssFalling and PState[1] == pssLo) or
-            (PState[1] == pssFalling and PState[0] == pssLo)
+            (PState[0] == pssLo      and PState[1] == pssFalling) or
+            (PState[0] == pssFalling and PState[1] == pssFalling)
             ) {
-        bool Sns2 = (PState[0] == pssRising) or (PState[0] == pssHi);
-        bool Sns1 = (PState[1] == pssRising) or (PState[1] == pssHi);
-        Interface.ShowMSns(Sns1, Sns2);
         App.SignalEvt(EVTMSK_MSNS_OFF);
     }
 }

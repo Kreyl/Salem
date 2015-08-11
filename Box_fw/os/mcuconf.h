@@ -30,6 +30,13 @@
 
 #define STM32L1xx_MCUCONF
 
+// @KL
+#define STM32L1XX_MD
+
+/*
+ * HAL driver system settings.
+ */
+#define STM32_NO_INIT                       FALSE
 /*
  * ADC driver system settings.
  */
@@ -38,22 +45,6 @@
 #define STM32_ADC_IRQ_PRIORITY              6
 #define STM32_ADC_ADC1_DMA_IRQ_PRIORITY     6
 
-/*
- * EXT driver system settings.
- */
-#define STM32_EXT_EXTI0_IRQ_PRIORITY        6
-#define STM32_EXT_EXTI1_IRQ_PRIORITY        6
-#define STM32_EXT_EXTI2_IRQ_PRIORITY        6
-#define STM32_EXT_EXTI3_IRQ_PRIORITY        6
-#define STM32_EXT_EXTI4_IRQ_PRIORITY        6
-#define STM32_EXT_EXTI5_9_IRQ_PRIORITY      6
-#define STM32_EXT_EXTI10_15_IRQ_PRIORITY    6
-#define STM32_EXT_EXTI16_IRQ_PRIORITY       6
-#define STM32_EXT_EXTI17_IRQ_PRIORITY       6
-#define STM32_EXT_EXTI18_IRQ_PRIORITY       6
-#define STM32_EXT_EXTI19_IRQ_PRIORITY       6
-#define STM32_EXT_EXTI20_IRQ_PRIORITY       6
-#define STM32_EXT_EXTI21_22_IRQ_PRIORITY    6
 
 /*
  * GPT driver system settings.
@@ -138,7 +129,7 @@
 /*
  * USB driver system settings.
  */
-#define STM32_USB_USE_USB1                  TRUE
+#define STM32_USB_USE_USB1                  FALSE
 #define STM32_USB_LOW_POWER_ON_SUSPEND      FALSE
 #define STM32_USB_USB1_HP_IRQ_PRIORITY      13
 #define STM32_USB_USB1_LP_IRQ_PRIORITY      14

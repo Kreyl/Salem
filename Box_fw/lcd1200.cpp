@@ -16,7 +16,7 @@
 Lcd_t Lcd;
 
 void Lcd_t::Init(void) {
-    BckLt.Init(LCD_BCKLT_GPIO, LCD_BCKLT_PIN, LCD_BCKLT_TMR, LCD_BCKLT_CHNL, LCD_TOP_BRIGHTNESS);
+    BckLt.Init();
     // ==== GPIOs ====
     // Configure LCD_XRES, LCD_XCS, LCD_SCLK & LCD_SDA as Push-Pull output
     PinSetupOut(LCD_BCKLT_GPIO, LCD_XRES, omPushPull);

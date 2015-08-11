@@ -31,5 +31,10 @@
 
 // SPI
 #define CC_SPI      SPI1
+#if defined STM32L1XX_MD
+#define CC_SPI_AF   AF5
+#elif defined STM32F030
+#define CC_SPI_AF   AF0
+#endif
 
 #endif /* CC_GPIO_H_ */

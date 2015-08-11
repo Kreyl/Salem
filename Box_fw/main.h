@@ -8,14 +8,14 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include "kl_lib_L15x.h"
+#include "kl_lib.h"
 #include "ch.h"
 #include "hal.h"
-#include "clocking_L1xx.h"
+#include "clocking.h"
 #include "evt_mask.h"
 #include "uart.h"
 
-#define VERSION_STRING  "v1.0"
+#define VERSION_STRING  "v1.4"
 
 // All values must be 32bit to make things easier
 struct Settings_t {
@@ -36,12 +36,12 @@ struct Settings_t {
 #define DURATION_ACTIVE_MAX_S   9990
 #define DURATION_ACTIVE_DEFAULT 300
 #define ID_MIN                  1
-#define ID_MAX                  18
+#define ID_MAX                  15
 #define ID_DEFAULT              ID_MIN
 #define DURATION_DEADTIME_S     90
 
 // Radio timing
-#define RADIO_NOPKT_TIMEOUT_S   4
+#define RADIO_NOPKT_TIMEOUT_S   2
 
 class App_t {
 private:
@@ -55,7 +55,7 @@ public:
     void InitThread() { PThread = chThdSelf(); }
     Settings_t Settings;
     void LoadSettings();
-    void SaveSettings();    // Prepare to save settings
+    void SaveSettings() { chVTRestart(&ITmrSaving, S2ST(4), EVTMSK_SAVE); } // Prepare to save settings
     void SignalEvt(eventmask_t Evt) {
         chSysLock();
         chEvtSignalI(PThread, Evt);
