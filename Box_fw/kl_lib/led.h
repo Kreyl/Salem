@@ -46,7 +46,7 @@ public:
 #if 1 // ======================== Single Led Smooth ============================
 #define LED_TOP_VALUE       255
 
-typedef PinOutputPWM_t<LED_TOP_VALUE, invInverted, omPushPull> PinLedSmooth_t;
+typedef PinOutputPWM_t<LED_TOP_VALUE, invNotInverted, omPushPull> PinLedSmooth_t;
 
 class LedSmooth_t : public BaseSequencer_t<LedSmoothChunk_t> {
 private:
@@ -82,6 +82,7 @@ public:
         BaseSequencer_t(), IChnl(AChnl), ICurrentBrightness(0) {}
     void Init() {
         IChnl.Init();
+        IChnl.SetFrequencyHz(2000);
         SetBrightness(0);
     }
     void SetBrightness(uint8_t ABrightness) { IChnl.Set(ABrightness); }

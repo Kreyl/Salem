@@ -52,13 +52,6 @@ static void ProcessMSensors(PinSnsState_t *PState, uint32_t Len) {
 
     // Send ON evt if any is rising
     if(PState[0] == pssRising or PState[1] == pssRising) App.SignalEvt(EVTMSK_MSNS_ON);
-    // Send OFF evt if one is falling and other is low
-    else if((PState[0] == pssFalling and PState[1] == pssLo) or
-            (PState[0] == pssLo      and PState[1] == pssFalling) or
-            (PState[0] == pssFalling and PState[1] == pssFalling)
-            ) {
-        App.SignalEvt(EVTMSK_MSNS_OFF);
-    }
 }
 
 #define BUTTONS_CNT     4   // Setup appropriately. Required for buttons handler
@@ -70,8 +63,8 @@ const PinSns_t PinSns[] = {
         {GPIOB,  6, pudPullUp, ProcessButtons},
         {GPIOB, 15, pudPullUp, ProcessButtons},
         // Motion sensors
-        {GPIOB,  2, pudPullDown, ProcessMSensors},
         {GPIOB,  5, pudPullDown, ProcessMSensors},
+        {GPIOB,  2, pudPullDown, ProcessMSensors},
 };
 #define PIN_SNS_CNT     countof(PinSns)
 

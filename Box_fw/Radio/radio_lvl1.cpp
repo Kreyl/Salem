@@ -72,7 +72,7 @@ __attribute__((__noreturn__)) void rLevel1_t::ITask() {
         } // switch
 #endif
 
-#if 1 // ============ RX cycle ============
+#if 0 // ============ RX cycle ============
         uint8_t RxRslt;
         CC.SetChannel(ID2RCHNL(App.Settings.ID));
         RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &LastRssidB);

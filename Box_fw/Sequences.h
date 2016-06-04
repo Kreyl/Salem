@@ -223,6 +223,15 @@ const LedChunk_t lsqDoorSecretKey[] = {
 #if 1 // =========================== LED Smooth ================================
 #define LED_TOP_BRIGHTNESS  255
 
+#define ACTIVE_DURATION_MS  2007
+
+const LedSmoothChunk_t lsqActivated[] = {
+        {csSetup, 0, LED_TOP_BRIGHTNESS},
+        {csWait, ACTIVE_DURATION_MS},
+        {csSetup, 180, 0},
+        {csEnd}
+};
+
 const LedSmoothChunk_t lsqFadeIn[] = {
         {csSetup, 630, LED_TOP_BRIGHTNESS},
         {csEnd}
@@ -244,6 +253,7 @@ const LedSmoothChunk_t lsqEnterIdle[] = {
 
 #if 1 // ============================= Beeper ==================================
 #define BEEP_VOLUME     2
+// Beep max volume = 10 ((22-1)/2)
 
 // Type, duration_ms, freq, volume
 const BeepChunk_t bsqButton[] = {
@@ -252,6 +262,14 @@ const BeepChunk_t bsqButton[] = {
         {csSetup, 0},
         {csEnd}
 };
+
+const BeepChunk_t bsqActivated[] = {
+        {csSetup, 10, 2400},
+        {csWait, ACTIVE_DURATION_MS},
+        {csSetup, 0},
+        {csEnd}
+};
+
 const BeepChunk_t bsqBeepBeep[] = {
         {csSetup, BEEP_VOLUME, 1975},
         {csWait, 54},
