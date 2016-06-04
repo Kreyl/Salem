@@ -5,16 +5,16 @@
  *      Author: Kreyl
  */
 
-#ifndef KL_LIB_CHUNKTYPES_H_
-#define KL_LIB_CHUNKTYPES_H_
+#pragma once
 
 #include "color.h"
 #include "ch.h"
+#include "uart.h"
 
 enum ChunkSort_t {csSetup, csWait, csGoto, csEnd};
 
 // The beginning of any sort of chunk. Everyone must contain it.
-#define BaseChunk_t \
+#define BaseChunk_Vars \
     ChunkSort_t ChunkSort;          \
     union {                         \
         uint32_t Value;             \
@@ -23,23 +23,26 @@ enum ChunkSort_t {csSetup, csWait, csGoto, csEnd};
         uint32_t ChunkToJumpTo;     \
     }
 
-
 // ==== Different types of chunks ====
+struct BaseChunk_t {
+    BaseChunk_Vars;
+};
+
 // RGB LED chunk
 struct LedRGBChunk_t {
-    BaseChunk_t;
+    BaseChunk_Vars;
     Color_t Color;
 } __attribute__((packed));
 
 // LED Smooth
 struct LedSmoothChunk_t {
-    BaseChunk_t;
+    BaseChunk_Vars;
     uint8_t Brightness;
 } __attribute__((packed));
 
 // Beeper
-struct BeepChunk_t {
-    BaseChunk_t;    // Volume
+struct BeepChunk_t {   // Value == Volume
+    BaseChunk_Vars;
     uint16_t Freq_Hz;
 } __attribute__((packed));
 
@@ -57,31 +60,43 @@ public:
 
 // Common Timer callback
 static void GeneralSequencerTmrCallback(void *p) {
-    chSysLockFromIsr();
+    chSysLockFromISR();
     ((BaseSequenceProcess_t*)p)->IProcessSequenceI();
-    chSysUnlockFromIsr();
+    chSysUnlockFromISR();
 }
 
 template <class TChunk>
 class BaseSequencer_t : public BaseSequenceProcess_t {
 private:
-    VirtualTimer ITmr;
+    virtual_timer_t ITmr;
 protected:
     const TChunk *IPStartChunk, *IPCurrentChunk;
-    BaseSequencer_t() : IPStartChunk(nullptr), IPCurrentChunk(nullptr) {}
+    BaseSequencer_t() : IPStartChunk(nullptr), IPCurrentChunk(nullptr),
+            PThread(nullptr), EvtEnd(0) {}
     void SetupDelay(uint32_t ms) { chVTSetI(&ITmr, MS2ST(ms), GeneralSequencerTmrCallback, this); }
+    thread_t *PThread;
+    eventmask_t EvtEnd;
 public:
-    void StartSequence(const TChunk *PLedChunk) {
-        chSysLock();
-        IPStartChunk = PLedChunk;   // Save first chunk
-        IPCurrentChunk = PLedChunk;
-        IProcessSequenceI();
-        chSysUnlock();
+    void SetupSeqEndEvt(thread_t *APThread, eventmask_t AEvt = 0) {
+        PThread = APThread;
+        EvtEnd = AEvt;
+    }
+    void StartSequence(const TChunk *PChunk) {
+        if(PChunk == nullptr) Stop();
+        else {
+            chSysLock();
+            IPStartChunk = PChunk;   // Save first chunk
+            IPCurrentChunk = PChunk;
+            IProcessSequenceI();
+            chSysUnlock();
+        }
     }
     void Stop() {
         chSysLock();
         if(chVTIsArmedI(&ITmr)) chVTResetI(&ITmr);
         ISwitchOff();
+        IPStartChunk = nullptr;
+        IPCurrentChunk = nullptr;
         chSysUnlock();
     }
     const TChunk* GetCurrentSequence() { return IPStartChunk; }
@@ -111,6 +126,7 @@ public:
                     break;
 
                 case csEnd:
+                    if(PThread != nullptr) chEvtSignalI(PThread, EvtEnd);
                     return;
                     break;
             } // switch
@@ -118,5 +134,3 @@ public:
     } // IProcessSequenceI
 };
 #endif
-
-#endif /* KL_LIB_CHUNKTYPES_H_ */

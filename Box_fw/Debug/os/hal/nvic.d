@@ -1,72 +1,146 @@
-os/hal/nvic.o: ../os/hal/nvic.c ../os/kernel/include/ch.h ../os/chconf.h \
- ../os/hal/chtypes.h ../os/kernel/include/chlists.h ../os/hal/chcore.h \
- ../os/hal/cmparams.h ../os/hal/chcore_v7m.h ../os/hal/nvic.h \
- ../os/kernel/include/chsys.h ../os/kernel/include/chvt.h \
- ../os/kernel/include/chschd.h ../os/kernel/include/chsem.h \
- ../os/kernel/include/chbsem.h ../os/kernel/include/chmtx.h \
- ../os/kernel/include/chcond.h ../os/kernel/include/chevents.h \
- ../os/kernel/include/chmsg.h ../os/kernel/include/chmboxes.h \
- ../os/kernel/include/chmemcore.h ../os/kernel/include/chheap.h \
- ../os/kernel/include/chmempools.h ../os/kernel/include/chthreads.h \
- ../os/kernel/include/chdynamic.h ../os/kernel/include/chregistry.h \
- ../os/kernel/include/chinline.h ../os/kernel/include/chqueues.h \
- ../os/kernel/include/chstreams.h ../os/kernel/include/chfiles.h \
- ../os/kernel/include/chdebug.h
+os/hal/nvic.o: ../os/hal/nvic.c ../os/hal/hal.h ../os/hal/osal.h \
+ ../os/include/ch.h ../os/hal/chtypes.h ../os/chconf.h \
+ ../os/include/chlicense.h ../os/include/chsystypes.h ../os/hal/chcore.h \
+ ../os/stm32L15x/cmparams.h .././board.h ../os/stm32L15x/stm32l1xx.h \
+ ../os/stm32L15x/stm32l151xb.h ../os/hal/cmsis/core_cm3.h \
+ ../os/hal/cmsis/core_cmInstr.h ../os/hal/cmsis/core_cmFunc.h \
+ ../os/stm32L15x/system_stm32l1xx.h ../os/stm32L15x/chcore_v7m.h \
+ ../os/hal/chcore_timer.h ../os/hal/st.h ../os/hal/st_lld.h \
+ ../os/mcuconf.h ../os/stm32L15x/stm32_registry.h ../os/hal/stm32_tim.h \
+ ../os/stm32L15x/stm32l1xx.h ../os/include/chdebug.h ../os/include/chtm.h \
+ ../os/include/chstats.h ../os/include/chschd.h ../os/include/chsys.h \
+ ../os/include/chvt.h ../os/include/chthreads.h \
+ ../os/include/chregistry.h ../os/include/chsem.h ../os/include/chbsem.h \
+ ../os/include/chmtx.h ../os/include/chcond.h ../os/include/chevents.h \
+ ../os/include/chmsg.h ../os/include/chmboxes.h ../os/include/chmemcore.h \
+ ../os/include/chheap.h ../os/include/chmempools.h \
+ ../os/include/chdynamic.h ../os/include/chqueues.h \
+ ../os/include/chstreams.h ../os/halconf.h ../os/mcuconf.h \
+ ../os/stm32L15x/hal_lld.h ../os/stm32L15x/stm32_registry.h \
+ ../os/hal/nvic.h ../os/stm32L15x/stm32_isr.h ../os/stm32L15x/stm32_dma.h \
+ ../os/stm32L15x/stm32_rcc.h ../os/hal/hal_streams.h \
+ ../os/hal/hal_channels.h ../os/hal/hal_files.h ../os/hal/hal_ioblock.h \
+ ../os/hal/hal_buffers.h ../os/hal/hal_queues.h ../os/hal/usb.h \
+ ../os/hal/chtypes.h
 
-../os/kernel/include/ch.h:
+../os/hal/hal.h:
 
-../os/chconf.h:
+../os/hal/osal.h:
+
+../os/include/ch.h:
 
 ../os/hal/chtypes.h:
 
-../os/kernel/include/chlists.h:
+../os/chconf.h:
+
+../os/include/chlicense.h:
+
+../os/include/chsystypes.h:
 
 ../os/hal/chcore.h:
 
-../os/hal/cmparams.h:
+../os/stm32L15x/cmparams.h:
 
-../os/hal/chcore_v7m.h:
+.././board.h:
+
+../os/stm32L15x/stm32l1xx.h:
+
+../os/stm32L15x/stm32l151xb.h:
+
+../os/hal/cmsis/core_cm3.h:
+
+../os/hal/cmsis/core_cmInstr.h:
+
+../os/hal/cmsis/core_cmFunc.h:
+
+../os/stm32L15x/system_stm32l1xx.h:
+
+../os/stm32L15x/chcore_v7m.h:
+
+../os/hal/chcore_timer.h:
+
+../os/hal/st.h:
+
+../os/hal/st_lld.h:
+
+../os/mcuconf.h:
+
+../os/stm32L15x/stm32_registry.h:
+
+../os/hal/stm32_tim.h:
+
+../os/stm32L15x/stm32l1xx.h:
+
+../os/include/chdebug.h:
+
+../os/include/chtm.h:
+
+../os/include/chstats.h:
+
+../os/include/chschd.h:
+
+../os/include/chsys.h:
+
+../os/include/chvt.h:
+
+../os/include/chthreads.h:
+
+../os/include/chregistry.h:
+
+../os/include/chsem.h:
+
+../os/include/chbsem.h:
+
+../os/include/chmtx.h:
+
+../os/include/chcond.h:
+
+../os/include/chevents.h:
+
+../os/include/chmsg.h:
+
+../os/include/chmboxes.h:
+
+../os/include/chmemcore.h:
+
+../os/include/chheap.h:
+
+../os/include/chmempools.h:
+
+../os/include/chdynamic.h:
+
+../os/include/chqueues.h:
+
+../os/include/chstreams.h:
+
+../os/halconf.h:
+
+../os/mcuconf.h:
+
+../os/stm32L15x/hal_lld.h:
+
+../os/stm32L15x/stm32_registry.h:
 
 ../os/hal/nvic.h:
 
-../os/kernel/include/chsys.h:
+../os/stm32L15x/stm32_isr.h:
 
-../os/kernel/include/chvt.h:
+../os/stm32L15x/stm32_dma.h:
 
-../os/kernel/include/chschd.h:
+../os/stm32L15x/stm32_rcc.h:
 
-../os/kernel/include/chsem.h:
+../os/hal/hal_streams.h:
 
-../os/kernel/include/chbsem.h:
+../os/hal/hal_channels.h:
 
-../os/kernel/include/chmtx.h:
+../os/hal/hal_files.h:
 
-../os/kernel/include/chcond.h:
+../os/hal/hal_ioblock.h:
 
-../os/kernel/include/chevents.h:
+../os/hal/hal_buffers.h:
 
-../os/kernel/include/chmsg.h:
+../os/hal/hal_queues.h:
 
-../os/kernel/include/chmboxes.h:
+../os/hal/usb.h:
 
-../os/kernel/include/chmemcore.h:
-
-../os/kernel/include/chheap.h:
-
-../os/kernel/include/chmempools.h:
-
-../os/kernel/include/chthreads.h:
-
-../os/kernel/include/chdynamic.h:
-
-../os/kernel/include/chregistry.h:
-
-../os/kernel/include/chinline.h:
-
-../os/kernel/include/chqueues.h:
-
-../os/kernel/include/chstreams.h:
-
-../os/kernel/include/chfiles.h:
-
-../os/kernel/include/chdebug.h:
+../os/hal/chtypes.h:

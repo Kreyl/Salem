@@ -1,122 +1,162 @@
 kl_lib/uart.o: ../kl_lib/uart.cpp ../kl_lib/uart.h ../kl_lib/kl_lib.h \
- ../os/kernel/include/ch.h ../os/chconf.h ../os/hal/chtypes.h \
- ../os/kernel/include/chlists.h ../os/hal/chcore.h ../os/hal/cmparams.h \
- ../os/hal/chcore_v7m.h ../os/hal/nvic.h ../os/kernel/include/chsys.h \
- ../os/kernel/include/chvt.h ../os/kernel/include/chschd.h \
- ../os/kernel/include/chsem.h ../os/kernel/include/chbsem.h \
- ../os/kernel/include/chmtx.h ../os/kernel/include/chcond.h \
- ../os/kernel/include/chevents.h ../os/kernel/include/chmsg.h \
- ../os/kernel/include/chmboxes.h ../os/kernel/include/chmemcore.h \
- ../os/kernel/include/chheap.h ../os/kernel/include/chmempools.h \
- ../os/kernel/include/chthreads.h ../os/kernel/include/chdynamic.h \
- ../os/kernel/include/chregistry.h ../os/kernel/include/chinline.h \
- ../os/kernel/include/chqueues.h ../os/kernel/include/chstreams.h \
- ../os/kernel/include/chfiles.h ../os/kernel/include/chdebug.h \
- ../os/hal/hal.h ../os/halconf.h ../os/mcuconf.h ../os/hal/hal_lld.h \
- ../os/hal/stm32.h ../os/hal/stm32l1xx.h ../os/hal/core_cm3.h \
- ../os/hal/core_cmInstr.h ../os/hal/core_cmFunc.h ../os/hal/stm32_dma.h \
- ../os/hal/stm32_rcc.h ../kl_lib/clocking.h ../os/mcuconf.h \
- ../os/hal/stm32l1xx.h ../kl_lib/kl_sprintf.h ../kl_lib/cmd.h .././main.h \
- ../kl_lib/clocking.h .././evt_mask.h ../kl_lib/uart.h
+ ../os/include/ch.h ../os/hal/chtypes.h ../os/chconf.h \
+ ../os/include/chlicense.h ../os/include/chsystypes.h ../os/hal/chcore.h \
+ ../os/stm32L15x/cmparams.h .././board.h ../os/stm32L15x/stm32l1xx.h \
+ ../os/stm32L15x/stm32l151xb.h ../os/hal/cmsis/core_cm3.h \
+ ../os/hal/cmsis/core_cmInstr.h ../os/hal/cmsis/core_cmFunc.h \
+ ../os/stm32L15x/system_stm32l1xx.h ../os/stm32L15x/chcore_v7m.h \
+ ../os/hal/chcore_timer.h ../os/hal/st.h ../os/hal/st_lld.h \
+ ../os/mcuconf.h ../os/stm32L15x/stm32_registry.h ../os/hal/stm32_tim.h \
+ ../os/stm32L15x/stm32l1xx.h ../os/include/chdebug.h ../os/include/chtm.h \
+ ../os/include/chstats.h ../os/include/chschd.h ../os/include/chsys.h \
+ ../os/include/chvt.h ../os/include/chthreads.h \
+ ../os/include/chregistry.h ../os/include/chsem.h ../os/include/chbsem.h \
+ ../os/include/chmtx.h ../os/include/chcond.h ../os/include/chevents.h \
+ ../os/include/chmsg.h ../os/include/chmboxes.h ../os/include/chmemcore.h \
+ ../os/include/chheap.h ../os/include/chmempools.h \
+ ../os/include/chdynamic.h ../os/include/chqueues.h \
+ ../os/include/chstreams.h ../os/hal/hal.h ../os/hal/osal.h \
+ ../os/halconf.h ../os/mcuconf.h ../os/stm32L15x/hal_lld.h \
+ ../os/stm32L15x/stm32_registry.h ../os/hal/nvic.h \
+ ../os/stm32L15x/stm32_isr.h ../os/stm32L15x/stm32_dma.h \
+ ../os/stm32L15x/stm32_rcc.h ../os/hal/hal_streams.h \
+ ../os/hal/hal_channels.h ../os/hal/hal_files.h ../os/hal/hal_ioblock.h \
+ ../os/hal/hal_buffers.h ../os/hal/hal_queues.h ../os/hal/usb.h \
+ ../os/hal/chtypes.h ../kl_lib/kl_sprintf.h ../kl_lib/shell.h .././main.h \
+ ../kl_lib/uart.h .././evt_mask.h
 
 ../kl_lib/uart.h:
 
 ../kl_lib/kl_lib.h:
 
-../os/kernel/include/ch.h:
-
-../os/chconf.h:
+../os/include/ch.h:
 
 ../os/hal/chtypes.h:
 
-../os/kernel/include/chlists.h:
+../os/chconf.h:
+
+../os/include/chlicense.h:
+
+../os/include/chsystypes.h:
 
 ../os/hal/chcore.h:
 
-../os/hal/cmparams.h:
+../os/stm32L15x/cmparams.h:
 
-../os/hal/chcore_v7m.h:
+.././board.h:
 
-../os/hal/nvic.h:
+../os/stm32L15x/stm32l1xx.h:
 
-../os/kernel/include/chsys.h:
+../os/stm32L15x/stm32l151xb.h:
 
-../os/kernel/include/chvt.h:
+../os/hal/cmsis/core_cm3.h:
 
-../os/kernel/include/chschd.h:
+../os/hal/cmsis/core_cmInstr.h:
 
-../os/kernel/include/chsem.h:
+../os/hal/cmsis/core_cmFunc.h:
 
-../os/kernel/include/chbsem.h:
+../os/stm32L15x/system_stm32l1xx.h:
 
-../os/kernel/include/chmtx.h:
+../os/stm32L15x/chcore_v7m.h:
 
-../os/kernel/include/chcond.h:
+../os/hal/chcore_timer.h:
 
-../os/kernel/include/chevents.h:
+../os/hal/st.h:
 
-../os/kernel/include/chmsg.h:
+../os/hal/st_lld.h:
 
-../os/kernel/include/chmboxes.h:
+../os/mcuconf.h:
 
-../os/kernel/include/chmemcore.h:
+../os/stm32L15x/stm32_registry.h:
 
-../os/kernel/include/chheap.h:
+../os/hal/stm32_tim.h:
 
-../os/kernel/include/chmempools.h:
+../os/stm32L15x/stm32l1xx.h:
 
-../os/kernel/include/chthreads.h:
+../os/include/chdebug.h:
 
-../os/kernel/include/chdynamic.h:
+../os/include/chtm.h:
 
-../os/kernel/include/chregistry.h:
+../os/include/chstats.h:
 
-../os/kernel/include/chinline.h:
+../os/include/chschd.h:
 
-../os/kernel/include/chqueues.h:
+../os/include/chsys.h:
 
-../os/kernel/include/chstreams.h:
+../os/include/chvt.h:
 
-../os/kernel/include/chfiles.h:
+../os/include/chthreads.h:
 
-../os/kernel/include/chdebug.h:
+../os/include/chregistry.h:
+
+../os/include/chsem.h:
+
+../os/include/chbsem.h:
+
+../os/include/chmtx.h:
+
+../os/include/chcond.h:
+
+../os/include/chevents.h:
+
+../os/include/chmsg.h:
+
+../os/include/chmboxes.h:
+
+../os/include/chmemcore.h:
+
+../os/include/chheap.h:
+
+../os/include/chmempools.h:
+
+../os/include/chdynamic.h:
+
+../os/include/chqueues.h:
+
+../os/include/chstreams.h:
 
 ../os/hal/hal.h:
+
+../os/hal/osal.h:
 
 ../os/halconf.h:
 
 ../os/mcuconf.h:
 
-../os/hal/hal_lld.h:
+../os/stm32L15x/hal_lld.h:
 
-../os/hal/stm32.h:
+../os/stm32L15x/stm32_registry.h:
 
-../os/hal/stm32l1xx.h:
+../os/hal/nvic.h:
 
-../os/hal/core_cm3.h:
+../os/stm32L15x/stm32_isr.h:
 
-../os/hal/core_cmInstr.h:
+../os/stm32L15x/stm32_dma.h:
 
-../os/hal/core_cmFunc.h:
+../os/stm32L15x/stm32_rcc.h:
 
-../os/hal/stm32_dma.h:
+../os/hal/hal_streams.h:
 
-../os/hal/stm32_rcc.h:
+../os/hal/hal_channels.h:
 
-../kl_lib/clocking.h:
+../os/hal/hal_files.h:
 
-../os/mcuconf.h:
+../os/hal/hal_ioblock.h:
 
-../os/hal/stm32l1xx.h:
+../os/hal/hal_buffers.h:
+
+../os/hal/hal_queues.h:
+
+../os/hal/usb.h:
+
+../os/hal/chtypes.h:
 
 ../kl_lib/kl_sprintf.h:
 
-../kl_lib/cmd.h:
+../kl_lib/shell.h:
 
 .././main.h:
 
-../kl_lib/clocking.h:
+../kl_lib/uart.h:
 
 .././evt_mask.h:
-
-../kl_lib/uart.h:

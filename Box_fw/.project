@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>SalemBox</name>
+	<name>Locket_fw</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -24,10 +24,4 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>$%7BPARENT-3-PROJECT_LOC%7D/ChibiArmlet/Firmware</value>
-		</variable>
-	</variableList>
 </projectDescription>

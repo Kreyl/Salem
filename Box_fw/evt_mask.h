@@ -5,27 +5,18 @@
  *      Author: g.kruglov
  */
 
-#ifndef EVT_MASK_H_
-#define EVT_MASK_H_
+#pragma once
 
 // Event masks
-#define EVTMSK_NO_MASK          0
+#define EVT_UART_NEW_CMD    EVENT_MASK(1)
+#define EVT_BUTTONS         EVENT_MASK(2)
+#define EVT_OFF             EVENT_MASK(3)
+#define EVT_PILL_CHECK      EVENT_MASK(4)
+#define EVT_LED_SEQ_END     EVENT_MASK(5)
 
-#define EVTMSK_BUTTONS          EVENT_MASK(1)
-#define EVTMSK_MSNS_ON          EVENT_MASK(2)
-#define EVTMSK_MSNS_OFF         EVENT_MASK(3)
-#define EVTMSK_SAVE             EVENT_MASK(4)
+#define EVT_LEDS_DONE       EVENT_MASK(6)
 
-#define EVTMSK_MSNS_AFTEROFF_TIMEOUT EVENT_MASK(5)
-#define EVTMSK_DEADTIME_END     EVENT_MASK(6)
+#define EVT_SAMPLING        EVENT_MASK(24)
+#define EVT_ADC_DONE        EVENT_MASK(25)
 
-#define EVTMSK_BCKLT_OFF        EVENT_MASK(11)
-
-#define EVTMSK_RADIO_RX         EVENT_MASK(21)
-#define EVTMSK_RADIO_ON_TIMEOUT EVENT_MASK(22)
-
-//#define EVTMSK_UART_RX_POLL     EVENT_MASK(11)
-
-
-
-#endif /* EVT_MASK_H_ */
+#define EVT_EVERY_SECOND    EVENT_MASK(31)

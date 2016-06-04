@@ -13,8 +13,18 @@
 // Mixing two colors
 #define ClrMix(C, B, L)     ((C * L + B * (255 - L)) / 255)
 
+// Smooth delay
+static inline uint32_t CalcDelay(uint16_t AValue, uint32_t Smooth) {
+    return (uint32_t)((Smooth / (AValue+4)) + 1);
+}
+
 struct Color_t {
-    uint8_t R, G, B;
+    union {
+        struct {
+            uint8_t R, G, B;
+        };
+        uint32_t DWord32;
+    };
     bool operator == (const Color_t &AColor) { return ((R == AColor.R) and (G == AColor.G) and (B == AColor.B)); }
     bool operator != (const Color_t &AColor) { return ((R != AColor.R) or  (G != AColor.G) or  (B != AColor.B)); }
     Color_t& operator = (const Color_t &Right) { R = Right.R; G = Right.G; B = Right.B; return *this; }
@@ -27,13 +37,13 @@ struct Color_t {
         else if(B > PColor->B) B--;
     }
     void Set(uint8_t Red, uint8_t Green, uint8_t Blue) { R = Red; G = Green; B = Blue; }
-    void Get(uint8_t *PR, uint8_t *PG, uint8_t *PB) { *PR = R; *PG = G; *PB = B; }
-    uint8_t RGBTo565_HiByte() {
+    void Get(uint8_t *PR, uint8_t *PG, uint8_t *PB) const { *PR = R; *PG = G; *PB = B; }
+    uint8_t RGBTo565_HiByte() const {
         uint32_t rslt = R & 0b11111000;
         rslt |= G >> 5;
         return (uint8_t)rslt;
     }
-    uint8_t RGBTo565_LoByte() {
+    uint8_t RGBTo565_LoByte() const {
         uint32_t rslt = (G << 3) & 0b11100000;
         rslt |= B >> 3;
         return (uint8_t)rslt;
@@ -54,6 +64,15 @@ struct Color_t {
 #define clMagenta   ((Color_t){255, 0, 255})
 #define clCyan      ((Color_t){0, 255, 255})
 #define clWhite     ((Color_t){255, 255, 255})
+
+#define CL_DARK_V       27
+#define clDarkRed       ((Color_t){CL_DARK_V, 0,         0})
+#define clDarkGreen     ((Color_t){0,         CL_DARK_V, 0})
+#define clDarkBlue      ((Color_t){0,         0,         CL_DARK_V})
+#define clDarkYellow    ((Color_t){CL_DARK_V, CL_DARK_V, 0})
+#define clDarkMagenta   ((Color_t){CL_DARK_V, 0,         CL_DARK_V})
+#define clDarkCyan      ((Color_t){0,         CL_DARK_V, CL_DARK_V})
+#define clDarkWhite     ((Color_t){CL_DARK_V, CL_DARK_V, CL_DARK_V})
 
 #if 0 // ============================ Color table ==============================
 const Color_t ColorTable[] = {

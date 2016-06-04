@@ -5,8 +5,7 @@
  *      Author: kreyl
  */
 
-#ifndef BATTERY_CONSTS_H_
-#define BATTERY_CONSTS_H_
+#pragma once
 
 #ifndef countof
 #define countof(A)  (sizeof(A)/sizeof(A[0]))
@@ -16,9 +15,12 @@
 struct mVPercent_t {
     uint16_t mV;
     uint8_t Percent;
+    uint8_t k;
 };
 
-#if 1 // ========================= Alkaline 1.5V ===============================
+enum BatteryState_t {bstDischarging, bstCharging, bstIdle};
+
+#if 0 // ========================= Alkaline 1.5V ===============================
 static const mVPercent_t mVPercentTableAlkaline[] = {
         {1440, 100},
         {1370, 80},
@@ -38,16 +40,16 @@ static uint8_t mV2PercentAlkaline(uint16_t mV) {
 
 #if 0 // ============================ Li-Ion ===================================
 static const mVPercent_t mVPercentTableLiIon[] = {
-        {4100, 100},
-        {4000, 90},
-        {3900, 80},
-        {3850, 70},
-        {3800, 60},
-        {3780, 50},
-        {3740, 40},
-        {3700, 30},
-        {3670, 20},
-        {3640, 10}
+        {4100, 100, 10},
+        {4000, 90,  10},
+        {3900, 80,  10},
+        {3850, 70,  5},
+        {3800, 60,  5},
+        {3780, 50,  2},
+        {3740, 40,  4},
+        {3700, 30,  4},
+        {3670, 20,  3},
+        {3640, 10,  3}
 };
 #define mVPercentTableLiIonSz    countof(mVPercentTableLiIon)
 
@@ -56,6 +58,15 @@ static uint8_t mV2PercentLiIon(uint16_t mV) {
         if(mV >= mVPercentTableLiIon[i].mV) return mVPercentTableLiIon[i].Percent;
     return 0;
 }
+#endif
+
+#if 1 // ============================ EEMB =====================================
+#define BAT_TOP_mV          4140
+#define BAT_ZERO_mV         3340
+#define BAT_END_mV          3100    // Do not operate if Ubat <= BAT_END_V
+#define BAT_PERCENT_STEP    8
+
+#define mV2Percent(V)   (((V) > BAT_TOP_mV)? 100 : (((V) > BAT_ZERO_mV)? (100 - (BAT_TOP_mV - (V)) / BAT_PERCENT_STEP) : 0))
 #endif
 
 #if 0 // ============================ 3V Li ====================================
@@ -68,5 +79,3 @@ static const mVPercent_t mVPercentTableLi3V[] = {
         {1950, 10}
 };
 #endif
-
-#endif /* BATTERY_CONSTS_H_ */

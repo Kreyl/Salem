@@ -5,13 +5,15 @@
  *      Author: kreyl
  */
 
-#include <buttons.h>
+#include "buttons.h"
 #include "ch.h"
 #include "evt_mask.h"
 #include "uart.h"
 #include "main.h" // App.Thread is here
 
-CircBuf_t<BtnEvtInfo_t, BTNS_EVT_Q_LEN> ButtonEvtBuf;
+#if SIMPLESENSORS_ENABLED
+
+CircBuf_t<BtnEvtInfo_t, BTNS_EVT_Q_LEN> EvtBuf;
 
 // ==== Inner use ====
 #if BTN_LONGPRESS
@@ -64,7 +66,7 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
             // Single key pressed, no combo
             AddEvtToQueue(bePress, i);  // Add single keypress
 #if BTN_LONGPRESS
-            LongPressTimer = chTimeNow();
+            LongPressTimer = chVTGetSystemTimeX();
 #endif
 #if BTN_REPEAT
             RepeatTimer = chTimeNow();
@@ -101,7 +103,8 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
                 ) {
 #if BTN_LONGPRESS // Check if long press
             if(!IsLongPress[i]) {
-                if(TimeElapsed(&LongPressTimer, BTN_LONGPRESS_DELAY_MS)) {
+//                Uart.Printf("Elapsed %u\r", chVTTimeElapsedSinceX(LongPressTimer));
+                if(chVTTimeElapsedSinceX(LongPressTimer) >= MS2ST(BTN_LONGPRESS_DELAY_MS)) {
                     IsLongPress[i] = true;
                     AddEvtToQueue(beLongPress, i);
                 }
@@ -127,18 +130,27 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
 
 void AddEvtToQueue(BtnEvtInfo_t Evt) {
     chSysLock();
-    ButtonEvtBuf.Put(&Evt);
-    App.SignalEvtI(EVTMSK_BUTTONS);
+    EvtBuf.Put(&Evt);
+    App.SignalEvtI(EVT_BUTTONS);
     chSysUnlock();
 }
 
 void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx) {
     BtnEvtInfo_t IEvt;
     IEvt.Type = AType;
+#if BTN_COMBO
     IEvt.BtnCnt = 1;
+#endif
+#if BUTTONS_CNT != 1
     IEvt.BtnID[0] = KeyIndx;
+#endif
     chSysLock();
-    ButtonEvtBuf.Put(&IEvt);
-    App.SignalEvtI(EVTMSK_BUTTONS);
+    EvtBuf.Put(&IEvt);
+    App.SignalEvtI(EVT_BUTTONS);
     chSysUnlock();
 }
+
+uint8_t BtnGetEvt(BtnEvtInfo_t *PEvt) {
+    return(EvtBuf.Get(PEvt));
+}
+#endif
