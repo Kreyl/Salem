@@ -33,29 +33,29 @@ static void EffectsThread(void *arg) {
 __noreturn
 void Effects_t::ITask() {
     while(true) {
-        chThdSleepMilliseconds(4);
-        LedWs.ISetCurrentColors();
+//        chThdSleepMilliseconds(4);
+//        LedWs.ISetCurrentColors();
 
-//        switch(IState) {
-//            case effIdle: chThdSleep(TIME_INFINITE); break;
-//
-//            case effAllSmoothly: {
-//                uint32_t Delay = 0;
-//                for(uint8_t i=0; i<LED_CNT; i++) {
-//                    uint32_t tmp = ICalcDelayN(i);  // }
-//                    if(tmp > Delay) Delay = tmp;    // } Calculate Delay
-//                    LedWs.ICurrentClr[i].Adjust(&DesiredClr[i]); // Adjust current color
-//                } // for
-//                LedWs.ISetCurrentColors();
-//                if(Delay == 0) {    // Setup completed
-//                    App.SignalEvt(EVT_LEDS_DONE);
-//                    IState = effIdle;
-//                }
-//                else chThdSleepMilliseconds(Delay);
-//            } break;
-//
-//            case effChunkRunningRandom: IProcessChunkRandom(); break;
-//        } // switch
+        switch(IState) {
+            case effIdle: chThdSleep(TIME_INFINITE); break;
+
+            case effAllSmoothly: {
+                uint32_t Delay = 0;
+                for(uint8_t i=0; i<LED_CNT; i++) {
+                    uint32_t tmp = ICalcDelayN(i);  // }
+                    if(tmp > Delay) Delay = tmp;    // } Calculate Delay
+                    LedWs.ICurrentClr[i].Adjust(&DesiredClr[i]); // Adjust current color
+                } // for
+                LedWs.ISetCurrentColors();
+                if(Delay == 0) {    // Setup completed
+                    App.SignalEvt(EVT_LEDS_DONE);
+                    IState = effIdle;
+                }
+                else chThdSleepMilliseconds(Delay);
+            } break;
+
+            case effChunkRunningRandom: IProcessChunkRandom(); break;
+        } // switch
     } // while true
 }
 
@@ -69,8 +69,8 @@ void Effects_t::Init() {
 void Effects_t::AllTogetherNow(Color_t Color) {
     IState = effIdle;
     for(uint32_t i=0; i<LED_CNT; i++) LedWs.ICurrentClr[i] = Color;
-//    LedWs.ISetCurrentColors();
-//    App.SignalEvt(EVT_LEDS_DONE);
+    LedWs.ISetCurrentColors();
+    App.SignalEvt(EVT_LEDS_DONE);
 }
 
 void Effects_t::AllTogetherSmoothly(Color_t Color, uint32_t ASmoothValue) {

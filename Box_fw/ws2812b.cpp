@@ -25,7 +25,8 @@ void LedWs_t::Init() {
     ISpi.Enable();
     ISpi.EnableTxDma();
 
-    // Zero buffer
+    chBSemObjectInit(&BSemaphore, NOT_TAKEN);
+    // Clear buffer
     for(uint32_t i=0; i<RST_W_CNT; i++) IBuf[i] = 0;
 
     // ==== DMA ====
@@ -35,46 +36,88 @@ void LedWs_t::Init() {
 }
 
 void LedWs_t::AppendBitsMadeOfByte(uint8_t Byte) {
-    uint8_t Bits;
-    Bits = Byte & 0b11000000;
-    if     (Bits == 0b00000000) *PBuf++ = SEQ_00;
-    else if(Bits == 0b01000000) *PBuf++ = SEQ_01;
-    else if(Bits == 0b10000000) *PBuf++ = SEQ_10;
-    else if(Bits == 0b11000000) *PBuf++ = SEQ_11;
+    uint16_t seq;
+    for(int i=0; i<8; i++) {
+        seq = (Byte & 0x80)? SEQ_1 : SEQ_0;
+        Byte <<= 1;
+        // Append sequence
+        switch(Indx) {
+            case 0:
+                *PBuf = seq;
+                break;
+            case 1:
+                *PBuf |= seq >> 10;
+                PBuf++;
+                *PBuf = seq << 6;
+                break;
+            case 2:
+                *PBuf |= seq >> 4;
+                break;
+            case 3:
+                *PBuf |= seq >> 14;
+                PBuf++;
+                *PBuf = seq << 2;
+                break;
+            case 4:
+                *PBuf |= seq >> 8;
+                PBuf++;
+                *PBuf = seq << 8;
+                break;
+            case 5:
+                *PBuf |= seq >> 2;
+                break;
+            case 6:
+                *PBuf |= seq >> 12;
+                PBuf++;
+                *PBuf = seq << 4;
+                break;
+            case 7:
+                *PBuf |= seq >> 6;
+                PBuf++;
+                break;
+            default: break;
+        }
+        Indx++;
+        if(Indx > 7) Indx = 0;
+    } // for
 
-    Bits = Byte & 0b00110000;
-    if     (Bits == 0b00000000) *PBuf++ = SEQ_00;
-    else if(Bits == 0b00010000) *PBuf++ = SEQ_01;
-    else if(Bits == 0b00100000) *PBuf++ = SEQ_10;
-    else if(Bits == 0b00110000) *PBuf++ = SEQ_11;
+}
 
-    Bits = Byte & 0b00001100;
-    if     (Bits == 0b00000000) *PBuf++ = SEQ_00;
-    else if(Bits == 0b00000100) *PBuf++ = SEQ_01;
-    else if(Bits == 0b00001000) *PBuf++ = SEQ_10;
-    else if(Bits == 0b00001100) *PBuf++ = SEQ_11;
-
-    Bits = Byte & 0b00000011;
-    if     (Bits == 0b00000000) *PBuf++ = SEQ_00;
-    else if(Bits == 0b00000001) *PBuf++ = SEQ_01;
-    else if(Bits == 0b00000010) *PBuf++ = SEQ_10;
-    else if(Bits == 0b00000011) *PBuf++ = SEQ_11;
+void LedWs_t::AppendOnes() {
+    switch(Indx) {
+        case 0: *PBuf  = 0xFFFF; break;
+        case 1: *PBuf |= 0x003F; break;
+        case 2: *PBuf |= 0x0FFF; break;
+        case 3: *PBuf |= 0x0003; break;
+        case 4: *PBuf |= 0x00FF; break;
+        case 5: *PBuf |= 0x3FFF; break;
+        case 6: *PBuf |= 0x000F; break;
+        case 7: *PBuf |= 0x03FF; break;
+        default: break;
+    }
+    PBuf++;
+    while(PBuf < &IBuf[TOTAL_W_CNT]) *PBuf++ = 0xFFFF;
 }
 
 void LedWs_t::ISetCurrentColors() {
+    if(chBSemWait(&BSemaphore) != MSG_OK) return;
     // Fill bit buffer
-    PBuf = &IBuf[RST_W_CNT];
+    PBuf = &IBuf[RST_W_CNT];    // Do not touch first "reset" bits
+    Indx = 0;
     for(uint32_t i=0; i<LED_CNT; i++) {
         AppendBitsMadeOfByte(ICurrentClr[i].G);
         AppendBitsMadeOfByte(ICurrentClr[i].R);
         AppendBitsMadeOfByte(ICurrentClr[i].B);
     }
-//    AppendOnes();
-    *PBuf = 0xFFFF;
+    AppendOnes();
+
+//    Uart.Printf("\r");
+//    for(int i = RST_W_CNT; i<TOTAL_W_CNT; i++) Uart.Printf("%X\r", IBuf[i]);
 
     // Start transmission
     dmaStreamSetMemory0(LEDWS_DMA, IBuf);
     dmaStreamSetTransactionSize(LEDWS_DMA, TOTAL_W_CNT);
     dmaStreamSetMode(LEDWS_DMA, LED_DMA_MODE);
     dmaStreamEnable(LEDWS_DMA);
+    chBSemSignal(&BSemaphore);
 }

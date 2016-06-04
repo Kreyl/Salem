@@ -30,11 +30,9 @@ int main(void) {
     Uart.Printf("\r%S %S\r", APP_NAME, BUILD_TIME);
     Clk.PrintFreqs();
 
-//    PinSetupOut(GPIOB, 5, omPushPull);
-//    PinSet(GPIOB, 5);
-
     Effects.Init();
-    Effects.AllTogetherNow(clGreen);
+//    Effects.AllTogetherNow(clGreen);
+    Effects.AllTogetherSmoothly(clGreen, 360);
 
     // Main cycle
     App.ITask();
