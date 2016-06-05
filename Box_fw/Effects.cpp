@@ -10,17 +10,13 @@
 
 Effects_t Effects;
 
-#define CHUNK_CNT   9
+#define CHUNK_CNT   5
 static LedChunk_t Chunk[CHUNK_CNT] = {
-        {0, 16},
-        {33, 17},
-        {34, 49},
-        {62, 50},
-        {63, 78},
-        {87, 79},
-        {88, 104},
-        {120, 105},
-        {121, 131},
+        {0, 14},
+        {15, 29},
+        {30, 44},
+        {45, 59},
+        {60, 74},
 };
 
 static THD_WORKING_AREA(waEffectsThread, 256);
@@ -54,7 +50,7 @@ void Effects_t::ITask() {
                 else chThdSleepMilliseconds(Delay);
             } break;
 
-            case effChunkRunningRandom: IProcessChunkRandom(); break;
+            case effChunkRunning: IProcessChunkRun(); break;
         } // switch
     } // while true
 }
@@ -87,31 +83,32 @@ void Effects_t::AllTogetherSmoothly(Color_t Color, uint32_t ASmoothValue) {
     }
 }
 
-void Effects_t::ChunkRunningRandom(Color_t Color, uint32_t NLeds, uint32_t ASmoothValue) {
+void Effects_t::ChunkRun(Color_t Color, uint32_t NLeds) {
     chSysLock();
     for(uint32_t i=0; i<CHUNK_CNT; i++) {
         Chunk[i].Color = Color;
         Chunk[i].NLeds = NLeds;
         Chunk[i].StartOver();
     }
-    for(uint32_t i=0; i<LED_CNT; i++) {
-        SmoothValue[i] = ASmoothValue;
-    }
-    IState = effChunkRunningRandom;
+//    for(uint32_t i=0; i<LED_CNT; i++) {
+//        SmoothValue[i] = ASmoothValue;
+//    }
+    IState = effChunkRunning;
     chSchWakeupS(PThd, MSG_OK);
     chSysUnlock();
 }
 
 uint32_t t=0;
 
-void Effects_t::IProcessChunkRandom() {
-    uint32_t Delay = 0;
+void Effects_t::IProcessChunkRun() {
+//    uint32_t Delay = 0;
     for(uint32_t i=0; i<CHUNK_CNT; i++) {
-        uint32_t ChunkDelay = Chunk[i].ProcessAndGetDelay();
-        if(ChunkDelay > Delay) Delay = ChunkDelay;
+//        uint32_t ChunkDelay =
+                Chunk[i].ProcessAndGetDelay();
+//        if(ChunkDelay > Delay) Delay = ChunkDelay;
     }
     LedWs.ISetCurrentColors();
-    chThdSleepMilliseconds(Delay);
+    chThdSleepMilliseconds(63);
 }
 
 uint32_t Effects_t::ICalcDelayN(uint32_t n) {
@@ -139,14 +136,16 @@ uint32_t LedChunk_t::ProcessAndGetDelay() {
         Effects.DesiredClr[Tail] = clBlack;
     }
     // Iterate Leds
-    uint32_t Delay = 0;
+//    uint32_t Delay = 99;
     int n = Start;
     do {
-        uint32_t tmp = Effects.ICalcDelayN(n);  // }
-        if(tmp > Delay) Delay = tmp;            // } Calculate Delay
-        if(Delay!= 0) LedWs.ICurrentClr[n].Adjust(&Effects.DesiredClr[n]); // Adjust current color
+//        uint32_t tmp = Effects.ICalcDelayN(n);  // }
+//        if(tmp > Delay) Delay = tmp;            // } Calculate Delay
+//        if(Delay!= 0)
+//            LedWs.ICurrentClr[n].Adjust(&Effects.DesiredClr[n]); // Adjust current color
+            LedWs.ICurrentClr[n] = Effects.DesiredClr[n]; // Adjust current color
     } while(GetNext(&n) == OK);
-    return Delay;
+    return 0;
 }
 
 void LedChunk_t::StartOver() {

@@ -32,7 +32,8 @@ int main(void) {
 
     Effects.Init();
 //    Effects.AllTogetherNow(clGreen);
-    Effects.AllTogetherSmoothly(clGreen, 360);
+//    Effects.AllTogetherSmoothly(clGreen, 360);
+    Effects.ChunkRun(clYellow, 3);
 
     // Main cycle
     App.ITask();
