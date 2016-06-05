@@ -19,6 +19,12 @@ static LedChunk_t Chunk[CHUNK_CNT] = {
         {60, 74},
 };
 
+static EffSinusParams_t SinParams = {
+        18,
+         {255, 64, 0},
+         clRed,
+};
+
 static THD_WORKING_AREA(waEffectsThread, 256);
 __noreturn
 static void EffectsThread(void *arg) {
@@ -51,6 +57,8 @@ void Effects_t::ITask() {
             } break;
 
             case effChunkRunning: IProcessChunkRun(); break;
+
+            case effSinus: IProcessSinus(); break;
         } // switch
     } // while true
 }
@@ -98,7 +106,50 @@ void Effects_t::ChunkRun(Color_t Color, uint32_t NLeds) {
     chSysUnlock();
 }
 
-uint32_t t=0;
+void Effects_t::SinusRun() {
+    chSysLock();
+    IState = effSinus;
+    SinParams.Phase = 0;
+    chSchWakeupS(PThd, MSG_OK);
+    chSysUnlock();
+}
+
+#define BRT_MAX     255
+
+void Effects_t::IProcessSinus() {
+    int HalfPer = SinParams.PeriodN / 2;
+    int BrtStep = BRT_MAX / HalfPer;
+
+    SinParams.Phase--;
+    if(SinParams.Phase >= SinParams.PeriodN) SinParams.Phase = 0;
+    else if(SinParams.Phase < 0) SinParams.Phase = SinParams.PeriodN-1;
+
+    int NumOfPeriods = LED_CNT/SinParams.PeriodN;
+
+    for(int Per=0; Per<NumOfPeriods; Per++) {
+        // First half
+        for(int i=0; i<HalfPer; i++) {
+            int k = i + SinParams.Phase;
+            if(k >= HalfPer) k-= HalfPer;
+            uint8_t Brt = BrtStep * k;
+            int N = Per * SinParams.PeriodN + i;
+            LedWs.ICurrentClr[N].BeMixOf(SinParams.Color1, SinParams.Color2, Brt);
+//            Uart.Printf(" i=%u; k=%d; N=%u; Brt=%u\r", i, k, N, Brt);
+        } // for i
+        // Second half
+        for(int i=HalfPer; i<SinParams.PeriodN; i++) {
+            int k = SinParams.PeriodN - i - SinParams.Phase - 1;
+            if(k >= HalfPer) k-= HalfPer;
+            else if(k < 0) k += HalfPer;
+            uint8_t Brt = BrtStep * k;
+            int N = Per * SinParams.PeriodN + i;
+            LedWs.ICurrentClr[N].BeMixOf(SinParams.Color1, SinParams.Color2, Brt);
+//            Uart.Printf("i=%u; k=%d; N=%u; Brt=%u\r", i, k, N, Brt);
+        } // for i
+    } // for Sh
+    LedWs.ISetCurrentColors();
+    chThdSleepMilliseconds(99);
+}
 
 void Effects_t::IProcessChunkRun() {
 //    uint32_t Delay = 0;

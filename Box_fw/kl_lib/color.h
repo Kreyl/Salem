@@ -5,8 +5,7 @@
  *      Author: Kreyl
  */
 
-#ifndef COLOR_H_
-#define COLOR_H_
+#pragma once
 
 #include "inttypes.h"
 
@@ -48,7 +47,7 @@ struct Color_t {
         rslt |= B >> 3;
         return (uint8_t)rslt;
     }
-    void MixOf(Color_t &Fore, Color_t &Back, uint32_t Brt) {
+    void BeMixOf(Color_t &Fore, Color_t &Back, uint32_t Brt) {
         R = ClrMix(Fore.R, Back.R, Brt);
         G = ClrMix(Fore.G, Back.G, Brt);
         B = ClrMix(Fore.B, Back.B, Brt);
@@ -179,5 +178,3 @@ const Color_t ColorTable[] = {
 };
 #define COLOR_TABLE_SZ  countof(ColorTable)
 #endif
-
-#endif /* COLOR_H_ */

@@ -12,7 +12,7 @@
 #include "color.h"
 #include "ws2812b.h"
 
-enum EffState_t {effIdle, effAllSmoothly, effChunkRunning};
+enum EffState_t {effIdle, effAllSmoothly, effChunkRunning, effSinus};
 
 class LedChunk_t {
 private:
@@ -34,18 +34,26 @@ public:
     void StartOver();
 };
 
+struct EffSinusParams_t {
+    int PeriodN;
+    Color_t Color1, Color2;
+    int Phase;
+};
+
 class Effects_t {
 private:
     thread_t *PThd;
     EffState_t IState;
     uint32_t SmoothValue[LED_CNT];
     void IProcessChunkRun();
+    void IProcessSinus();
 public:
     void Init();
     // Effects
     void AllTogetherNow(Color_t Color);
     void AllTogetherSmoothly(Color_t Color, uint32_t ASmoothValue);
     void ChunkRun(Color_t Color, uint32_t NLeds);
+    void SinusRun();
     // Inner use
     uint32_t ICalcDelayN(uint32_t n);
     Color_t DesiredClr[LED_CNT];
