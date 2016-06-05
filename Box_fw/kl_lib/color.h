@@ -8,6 +8,7 @@
 #pragma once
 
 #include "inttypes.h"
+#include "uart.h"
 
 // Mixing two colors
 #define ClrMix(C, B, L)     ((C * L + B * (255 - L)) / 255)
@@ -52,6 +53,7 @@ struct Color_t {
         G = ClrMix(Fore.G, Back.G, Brt);
         B = ClrMix(Fore.B, Back.B, Brt);
     }
+    void Print() { Uart.Printf("{%u, %u, %u}\r", R, G, B); }
 } __attribute__((packed));
 
 // ==== Colors ====

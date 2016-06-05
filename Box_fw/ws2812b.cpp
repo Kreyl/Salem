@@ -84,19 +84,20 @@ void LedWs_t::AppendBitsMadeOfByte(uint8_t Byte) {
 }
 
 void LedWs_t::AppendOnes() {
-    switch(Indx) {
-        case 0: *PBuf  = 0xFFFF; break;
-        case 1: *PBuf |= 0x003F; break;
-        case 2: *PBuf |= 0x0FFF; break;
-        case 3: *PBuf |= 0x0003; break;
-        case 4: *PBuf |= 0x00FF; break;
-        case 5: *PBuf |= 0x3FFF; break;
-        case 6: *PBuf |= 0x000F; break;
-        case 7: *PBuf |= 0x03FF; break;
-        default: break;
-    }
+//    switch(Indx) {
+//        case 0: *PBuf  = 0xFFFF; break;
+//        case 1: *PBuf |= 0x003F; break;
+//        case 2: *PBuf |= 0x0FFF; break;
+//        case 3: *PBuf |= 0x0003; break;
+//        case 4: *PBuf |= 0x00FF; break;
+//        case 5: *PBuf |= 0x3FFF; break;
+//        case 6: *PBuf |= 0x000F; break;
+//        case 7: *PBuf |= 0x03FF; break;
+//        default: break;
+//    }
     PBuf++;
-    while(PBuf < &IBuf[TOTAL_W_CNT]) *PBuf++ = 0xFFFF;
+    *PBuf = 0;
+//    while(PBuf < &IBuf[TOTAL_W_CNT]) *PBuf++ = 0xFFFF;
 }
 
 void LedWs_t::ISetCurrentColors() {
@@ -112,7 +113,7 @@ void LedWs_t::ISetCurrentColors() {
     AppendOnes();
 
 //    Uart.Printf("\r");
-//    for(int i = RST_W_CNT; i<TOTAL_W_CNT; i++) Uart.Printf("%X\r", IBuf[i]);
+//    for(int i = RST_W_CNT; i<TOTAL_W_CNT; i++) Uart.Printf("%04X\r", IBuf[i]);
 
     // Start transmission
     dmaStreamSetMemory0(LEDWS_DMA, IBuf);
