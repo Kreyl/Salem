@@ -48,7 +48,7 @@ struct Color_t {
         rslt |= B >> 3;
         return (uint8_t)rslt;
     }
-    void BeMixOf(Color_t &Fore, Color_t &Back, uint32_t Brt) {
+    void BeMixOf(const Color_t &Fore, const Color_t &Back, uint32_t Brt) {
         R = ClrMix(Fore.R, Back.R, Brt);
         G = ClrMix(Fore.G, Back.G, Brt);
         B = ClrMix(Fore.B, Back.B, Brt);

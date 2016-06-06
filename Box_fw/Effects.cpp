@@ -19,16 +19,57 @@ static LedChunk_t Chunk[CHUNK_CNT] = {
         {60, 74},
 };
 
-struct EffSinusParams_t {
-    int PeriodN;
-    Color_t Color1, Color2;
-    int Phase;
+#if 1 // ============================= Sinus ===================================
+#define BRT_PERIOD          511
+#define TICK_INC            8   // Defines speed of color switching
+#define SIN_PERIOD_LEN      17   // Number of LEDs
+#define SIN_PERIOD_CNT      (LED_CNT / SIN_PERIOD_LEN)
+#define SIN_LED_STEP        (BRT_PERIOD / SIN_PERIOD_LEN)
+#define SIN_REVERSE_DIR     TRUE
+const Color_t SinColor1 = {255, 64, 0};
+const Color_t SinColor2 = clRed;
+
+class EffSinus_t {
+private:
+    int Tick=0;   // 0...BRT_PERIOD
+    int TickToBrightness(int NLed) {
+        int Phase = Tick + NLed * SIN_LED_STEP;
+        if(Phase > BRT_PERIOD) Phase -= BRT_PERIOD;
+
+        if(Phase <= (BRT_PERIOD/2)) return Phase;
+        else return BRT_PERIOD-Phase;
+    }
+public:
+    void Process() {
+#if SIN_REVERSE_DIR
+        Tick -= TICK_INC;
+        if(Tick < 0) Tick = BRT_PERIOD;
+#else
+        Tick += TICK_INC;
+        if(Tick > BRT_PERIOD) Tick = 0;
+#endif
+
+        for(int Per=0; Per<SIN_PERIOD_CNT; Per++) {
+            for(int i=0; i<SIN_PERIOD_LEN; i++) {
+                int Brt = TickToBrightness(i);
+                int N = Per * SIN_PERIOD_LEN + i;
+                LedWs.ICurrentClr[N].BeMixOf(SinColor1, SinColor2, Brt);
+            }
+        }
+        LedWs.ISetCurrentColors();
+        chThdSleepMilliseconds(1);
+    }
 };
 
-static EffSinusParams_t SinParams = {
-        8,
-        {255, 64, 0}, clRed,
-};
+EffSinus_t EffSinus;
+
+void Effects_t::SinusRun() {
+    chSysLock();
+    IState = effSinus;
+    chSchWakeupS(PThd, MSG_OK);
+    chSysUnlock();
+}
+#endif
 
 #if 1 // =========================== Flashes ===================================
 #define FLASH_MIN_LEN           7
@@ -36,7 +77,7 @@ static EffSinusParams_t SinParams = {
 #define FLASH_DURATION_MS       18
 #define FLASH_BTW_DELAY_MS      99  // For double flashes
 #define FLASH_T2NEXT_MIN_MS     540
-#define FLASH_T2NEXT_MAX_MS     540//1008
+#define FLASH_T2NEXT_MAX_MS     4005
 
 static const Color_t FlashColors[] = {
         {108, 108, 255},
@@ -98,17 +139,6 @@ static void EffectsThread(void *arg) {
 __noreturn
 void Effects_t::ITask() {
     while(true) {
-//        chThdSleepMilliseconds(450);
-//        LedWs.ICurrentClr[0] = clGreen;
-//        LedWs.ICurrentClr[1] = clGreen;
-//        LedWs.ICurrentClr[2] = clGreen;
-//        LedWs.ISetCurrentColors();
-//        chThdSleepMilliseconds(360);
-//        LedWs.ICurrentClr[0] = clBlack;
-//        LedWs.ICurrentClr[1] = clBlack;
-//        LedWs.ICurrentClr[2] = clBlack;
-//        LedWs.ISetCurrentColors();
-
         switch(IState) {
             case effIdle: chThdSleep(TIME_INFINITE); break;
 
@@ -128,7 +158,7 @@ void Effects_t::ITask() {
             } break;
 
             case effChunkRunning: IProcessChunkRun(); break;
-            case effSinus: IProcessSinus(); break;
+            case effSinus: EffSinus.Process(); break;
             case effFlashes: Flash.Process(); break;
         } // switch
     } // while true
@@ -160,49 +190,6 @@ void Effects_t::AllTogetherSmoothly(Color_t Color, uint32_t ASmoothValue) {
         chSysUnlock();
     }
 }
-
-#if 1 // ============================== Sinus ==================================
-#define BRT_MAX     255
-uint8_t BrtTbl[LED_CNT];
-
-void Effects_t::SinusRun() {
-    chSysLock();
-    IState = effSinus;
-    SinParams.Phase = 0;
-    // Fill Table
-    int HalfPer = SinParams.PeriodN / 2;
-    uint8_t BrtStep = BRT_MAX / HalfPer;
-    for(int i=0; i<HalfPer; i++) BrtTbl[i] = BrtStep * i;
-    for(int i=HalfPer; i<SinParams.PeriodN; i++) BrtTbl[i] = BrtStep * (SinParams.PeriodN - i);
-    for(int i=0; i<SinParams.PeriodN; i++) Uart.PrintfI("%u ", BrtTbl[i]);
-    Uart.PrintfI("\r");
-    chSchWakeupS(PThd, MSG_OK);
-    chSysUnlock();
-}
-
-void Effects_t::IProcessSinus() {
-    int NumOfPeriods = LED_CNT/SinParams.PeriodN;
-    SinParams.Phase--;
-    if(SinParams.Phase >= SinParams.PeriodN) SinParams.Phase = 0;
-    else if(SinParams.Phase < 0) SinParams.Phase = SinParams.PeriodN-1;
-
-    for(int Per=0; Per<NumOfPeriods; Per++) {
-        for(int i=0; i<SinParams.PeriodN; i++) {
-            int k = i + SinParams.Phase;
-            k += (SinParams.PeriodN / 2) * (i % 2); // 2
-            //k += (SinParams.PeriodN / 3) * (i % 3); // 3
-            //k += (SinParams.PeriodN / 5) * (i % 5) * 2; // 2.5
-            if(k >= SinParams.PeriodN) k-= SinParams.PeriodN;
-            uint8_t Brt = BrtTbl[k];
-            int N = Per * SinParams.PeriodN + i;
-            LedWs.ICurrentClr[N].BeMixOf(SinParams.Color1, SinParams.Color2, Brt);
-//            Uart.Printf("i=%u; k=%d; N=%u; Brt=%u\r", i, k, N, Brt);
-        } // for i
-    } // for Sh
-    LedWs.ISetCurrentColors();
-    chThdSleepMilliseconds(99);
-}
-#endif
 
 #if 1 // ============================ ChunkRun =================================
 void Effects_t::ChunkRun(Color_t Color, uint32_t NLeds) {

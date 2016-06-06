@@ -40,7 +40,6 @@ private:
     EffState_t IState;
     uint32_t SmoothValue[LED_CNT];
     void IProcessChunkRun();
-    void IProcessSinus();
 public:
     void Init();
     // Effects
