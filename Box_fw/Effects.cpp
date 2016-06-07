@@ -21,8 +21,8 @@ static LedChunk_t Chunk[CHUNK_CNT] = {
 
 #if 1 // ============================= Sinus ===================================
 #define BRT_PERIOD          511
-#define TICK_INC            8   // Defines speed of color switching
-#define SIN_PERIOD_LEN      17   // Number of LEDs
+#define TICK_INC            2   // Defines speed of color switching
+#define SIN_PERIOD_LEN      75  // 7   // Number of LEDs
 #define SIN_PERIOD_CNT      (LED_CNT / SIN_PERIOD_LEN)
 #define SIN_LED_STEP        (BRT_PERIOD / SIN_PERIOD_LEN)
 #define SIN_REVERSE_DIR     TRUE
