@@ -31,7 +31,7 @@
 rLevel1_t Radio;
 
 #if 1 // ================================ Task =================================
-static THD_WORKING_AREA(warLvl1Thread, 256);
+static THD_WORKING_AREA(warLvl1Thread, 128);
 __noreturn
 static void rLvl1Thread(void *arg) {
     chRegSetThreadName("rLvl1");

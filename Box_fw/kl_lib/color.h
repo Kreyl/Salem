@@ -28,13 +28,42 @@ struct Color_t {
     bool operator == (const Color_t &AColor) { return ((R == AColor.R) and (G == AColor.G) and (B == AColor.B)); }
     bool operator != (const Color_t &AColor) { return ((R != AColor.R) or  (G != AColor.G) or  (B != AColor.B)); }
     Color_t& operator = (const Color_t &Right) { R = Right.R; G = Right.G; B = Right.B; return *this; }
-    void Adjust(const Color_t *PColor) {
-        if     (R < PColor->R) R++;
-        else if(R > PColor->R) R--;
-        if     (G < PColor->G) G++;
-        else if(G > PColor->G) G--;
-        if     (B < PColor->B) B++;
-        else if(B > PColor->B) B--;
+    void Adjust(const Color_t &PColor) {
+        if     (R < PColor.R) R++;
+        else if(R > PColor.R) R--;
+        if     (G < PColor.G) G++;
+        else if(G > PColor.G) G--;
+        if     (B < PColor.B) B++;
+        else if(B > PColor.B) B--;
+    }
+    void Adjust(const Color_t &PColor, uint32_t Step) {
+        uint32_t ThrsR = 255 - Step;
+        if(R < PColor.R) {
+            if(R <= ThrsR) R += Step;
+            else R = 255;
+        }
+        else if(R > PColor.R) {
+            if(R >= Step) R -= Step;
+            else R = 0;
+        }
+
+        if(G < PColor.G) {
+            if(G <= ThrsR) G += Step;
+            else G = 255;
+        }
+        else if(G > PColor.G) {
+            if(G >= Step) G -= Step;
+            else G = 0;
+        }
+
+        if(B < PColor.B) {
+            if(B <= ThrsR) B += Step;
+            else B = 255;
+        }
+        else if(B > PColor.B) {
+            if(B >= Step) B -= Step;
+            else B = 0;
+        }
     }
     void Set(uint8_t Red, uint8_t Green, uint8_t Blue) { R = Red; G = Green; B = Blue; }
     void Get(uint8_t *PR, uint8_t *PG, uint8_t *PB) const { *PR = R; *PG = G; *PB = B; }

@@ -12,8 +12,6 @@
 #include "color.h"
 #include "ws2812b.h"
 
-enum EffState_t {effIdle, effAllSmoothly, effChunkRunning, effSinus, effFlashes};
-
 class LedChunk_t {
 private:
     int Head, Tail;
@@ -37,9 +35,6 @@ public:
 class Effects_t {
 private:
     thread_t *PThd;
-    EffState_t IState;
-    uint32_t SmoothValue[LED_CNT];
-    void IProcessChunkRun();
 public:
     void Init();
     // Effects
@@ -48,10 +43,7 @@ public:
     void ChunkRun(Color_t Color, uint32_t NLeds);
     void SinusRun();
     void Flashes();
-    // Inner use
-    uint32_t ICalcDelayN(uint32_t n);
-    Color_t DesiredClr[LED_CNT];
-    void ITask();
+    void RandomGlow();
 };
 
 extern Effects_t Effects;

@@ -12,7 +12,11 @@
 #include "radio_lvl1.h"
 
 App_t App;
-TmrKL_t TmrEverySecond{MS2ST(99), EVT_EVERY_SECOND, tktPeriodic};
+AppState_t appState = appsIdle;
+
+TmrKL_t TmrEverySecond{MS2ST(5400), EVT_EVERY_SECOND, tktPeriodic};
+
+void SetStateIndication();
 
 int main(void) {
     // ==== Init Vcore & clock system ====
@@ -33,11 +37,12 @@ int main(void) {
     Clk.PrintFreqs();
 
     Effects.Init();
-//    Effects.AllTogetherNow(clGreen);
+//    Effects.AllTogetherNow({54,0,0});
 //    Effects.AllTogetherSmoothly(clGreen, 360);
 //    Effects.ChunkRun(clYellow, 3);
 //    Effects.SinusRun();
 //    Effects.Flashes();
+    Effects.RandomGlow();
 
 //    if(Radio.Init() != OK) {
 ////        Led.StartSequence(lsqFailure);
@@ -53,11 +58,23 @@ int main(void) {
 
 __noreturn
 void App_t::ITask() {
+//    bool flag = false;
     while(true) {
         __unused eventmask_t Evt = chEvtWaitAny(ALL_EVENTS);
         if(Evt & EVT_EVERY_SECOND) {
-            Uart.Printf("#\r");
-            Effects.AllTogetherNow(clGreen);
+//            Uart.Printf("#\r");
+
+//            if(flag) Effects.AllTogetherSmoothly(clGreen, 360);
+//            else Effects.AllTogetherSmoothly(clBlack, 360);
+//            flag = !flag;
+
+            switch(appState) {
+                case appsIdle: appState = appsRed; break;
+                case appsRed: appState = appsBlue; break;
+                case appsBlue: appState = appsWhite; break;
+                case appsWhite: appState = appsIdle; break;
+            }
+//            SetStateIndication();
         }
 
 #if UART_RX_ENABLED
@@ -68,6 +85,15 @@ void App_t::ITask() {
 #endif
 
     } // while true
+}
+
+void SetStateIndication() {
+    switch(appState) {
+        case appsIdle: Effects.AllTogetherSmoothly(clBlack, 720); break;
+        case appsRed: Effects.SinusRun(); break;
+        case appsBlue:  break;
+        case appsWhite:  break;
+    } // switch
 }
 
 

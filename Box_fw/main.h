@@ -13,7 +13,8 @@
 #include "evt_mask.h"
 #include "board.h"
 
-// Durations
+enum AppState_t { appsIdle, appsRed, appsBlue, appsWhite };
+extern AppState_t appState;
 
 class App_t {
 private:
