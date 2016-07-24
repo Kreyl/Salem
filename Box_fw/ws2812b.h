@@ -40,7 +40,6 @@ private:
     uint16_t *PBuf;
     int Indx;
     void AppendBitsMadeOfByte(uint8_t Byte);
-    void AppendOnes();
     binary_semaphore_t BSemaphore;
 public:
     void Init();

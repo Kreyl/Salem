@@ -85,25 +85,8 @@ void LedWs_t::AppendBitsMadeOfByte(uint8_t Byte) {
 
 }
 
-void LedWs_t::AppendOnes() {
-//    switch(Indx) {
-//        case 0: *PBuf  = 0xFFFF; break;
-//        case 1: *PBuf |= 0x003F; break;
-//        case 2: *PBuf |= 0x0FFF; break;
-//        case 3: *PBuf |= 0x0003; break;
-//        case 4: *PBuf |= 0x00FF; break;
-//        case 5: *PBuf |= 0x3FFF; break;
-//        case 6: *PBuf |= 0x000F; break;
-//        case 7: *PBuf |= 0x03FF; break;
-//        default: break;
-//    }
-    PBuf++;
-    *PBuf = 0;
-//    while(PBuf < &IBuf[TOTAL_W_CNT]) *PBuf++ = 0xFFFF;
-}
-
 void LedWs_t::ISetCurrentColors() {
-//    if(chBSemWait(&BSemaphore) != MSG_OK) return;
+    if(chBSemWait(&BSemaphore) != MSG_OK) return;
     // Fill bit buffer
     PBuf = &IBuf[RST_W_CNT];    // Do not touch first "reset" bits
     Indx = 0;
@@ -112,7 +95,9 @@ void LedWs_t::ISetCurrentColors() {
         AppendBitsMadeOfByte(ICurrentClr[i].R);
         AppendBitsMadeOfByte(ICurrentClr[i].B);
     }
-    AppendOnes();
+    // Make output zero after last byte transmitted
+    PBuf++;
+    *PBuf = 0;
 
 //    Uart.Printf("\r");
 //    for(int i = RST_W_CNT; i<TOTAL_W_CNT; i++) Uart.Printf("%04X\r", IBuf[i]);
@@ -122,5 +107,5 @@ void LedWs_t::ISetCurrentColors() {
     dmaStreamSetTransactionSize(LEDWS_DMA, TOTAL_W_CNT);
     dmaStreamSetMode(LEDWS_DMA, LED_DMA_MODE);
     dmaStreamEnable(LEDWS_DMA);
-//    chBSemSignal(&BSemaphore);
+    chBSemSignal(&BSemaphore);
 }
