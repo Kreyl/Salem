@@ -10,11 +10,12 @@
 
 Effects_t Effects;
 
-enum EffState_t {effIdle, effAllSmoothly, effChunkRunning, effSinus, effFlashes, effRandomGlow};
+enum EffState_t {effIdle, effAllSmoothly, effChunkRunning, effSinus, effFlashes};
 EffState_t IState;
 
 Color_t DesiredClr[LED_CNT];
 uint32_t SmoothValue;
+Color_t IColor1, IColor2;
 
 #define CHUNK_CNT   9
 static LedChunk_t Chunk[CHUNK_CNT] = {
@@ -54,8 +55,6 @@ uint32_t ICalcDelayN(uint32_t n, uint32_t ASmoothValue) {
 #define SIN_PERIOD_CNT      (LED_CNT / SIN_PERIOD_LEN)
 #define SIN_LED_STEP        (BRT_PERIOD / SIN_PERIOD_LEN)
 #define SIN_REVERSE_DIR     TRUE
-const Color_t SinColor1 = clBlack;
-const Color_t SinColor2 = (Color_t){255,0,0};
 
 class EffSinus_t {
 private:
@@ -81,7 +80,7 @@ public:
             for(int i=0; i<SIN_PERIOD_LEN; i++) {
                 int Brt = TickToBrightness(i);
                 int N = Per * SIN_PERIOD_LEN + i;
-                LedWs.ICurrentClr[N].BeMixOf(SinColor1, SinColor2, Brt);
+                LedWs.ICurrentClr[N].BeMixOf(IColor1, IColor2, Brt);
             }
         }
         LedWs.ISetCurrentColors();
@@ -91,8 +90,10 @@ public:
 
 EffSinus_t EffSinus;
 
-void Effects_t::SinusRun() {
+void Effects_t::SinusRun(Color_t Color1, Color_t Color2) {
     chSysLock();
+    IColor1 = Color1;
+    IColor2 = Color2;
     IState = effSinus;
     chSchWakeupS(PThd, MSG_OK);
     chSysUnlock();
@@ -169,50 +170,6 @@ static Flash_t Flash;
 void Effects_t::Flashes() {
     chSysLock();
     IState = effFlashes;
-    chSchWakeupS(PThd, MSG_OK);
-    chSysUnlock();
-}
-#endif
-
-#if 1 // =========================== Random Glow ===============================
-#define RG_COLOR        ((Color_t){0,0,255})
-#define RG_MAX_R        99
-
-class RandomGlow_t {
-private:
-
-public:
-    void Process() {
-        int StartN = 10; //Random(0, (LED_CNT-1));
-        int Radius = RG_MAX_R;
-        // Fade in from start
-        bool EqualR = false, EqualL = false;
-        int NRight = StartN, NLeft = StartN;
-        while(!EqualR or !EqualL) {
-            // Right side
-            if(!EqualR) {
-                for(int N = StartN; N <= NRight; N++) LedWs.ICurrentClr[N].Adjust(RG_COLOR, 4);
-                if((NRight < (LED_CNT-1)) and (NRight < (StartN + Radius))) NRight++;
-                else if(LedWs.ICurrentClr[NRight] == RG_COLOR) EqualR = true;
-            }
-            // Left side
-            if(!EqualL) {
-                for(int N = StartN; N >= NLeft; N--) LedWs.ICurrentClr[N].Adjust(RG_COLOR, 4);
-                if((NLeft > 0) and (NLeft > (StartN - Radius))) NLeft--;
-                else {
-                    if(LedWs.ICurrentClr[NLeft] == RG_COLOR) EqualL = true;
-                }
-            }
-            LedWs.ISetCurrentColors();
-            chThdSleepMilliseconds(100);
-        } // while
-    }
-};
-static RandomGlow_t RandomGlow;
-
-void Effects_t::RandomGlow() {
-    chSysLock();
-    IState = effRandomGlow;
     chSchWakeupS(PThd, MSG_OK);
     chSysUnlock();
 }
@@ -325,7 +282,6 @@ static void EffectsThread(void *arg) {
             case effChunkRunning: IProcessChunkRun(); break;
             case effSinus: EffSinus.Process(); break;
             case effFlashes: Flash.Process(); break;
-            case effRandomGlow: RandomGlow.Process(); break;
         } // switch
     } // while true
 }

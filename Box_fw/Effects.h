@@ -41,9 +41,8 @@ public:
     void AllTogetherNow(Color_t Color);
     void AllTogetherSmoothly(Color_t Color, uint32_t ASmoothValue);
     void ChunkRun(Color_t Color, uint32_t NLeds);
-    void SinusRun();
+    void SinusRun(Color_t Color1, Color_t Color2);
     void Flashes();
-    void RandomGlow();
 };
 
 extern Effects_t Effects;

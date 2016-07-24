@@ -12,7 +12,7 @@
 #include "radio_lvl1.h"
 
 App_t App;
-AppState_t appState = appsIdle;
+AppState_t appState = appsWhite;
 
 TmrKL_t TmrEverySecond{MS2ST(5400), EVT_EVERY_SECOND, tktPeriodic};
 
@@ -39,10 +39,11 @@ int main(void) {
     Effects.Init();
 //    Effects.AllTogetherNow({54,0,0});
 //    Effects.AllTogetherSmoothly(clGreen, 360);
-//    Effects.ChunkRun(clYellow, 3);
-//    Effects.SinusRun();
+//    Effects.ChunkRun(clBlue, 3);
+//    Effects.SinusRun(clBlue, clBlack);
 //    Effects.Flashes();
-    Effects.RandomGlow();
+
+    SetStateIndication();
 
 //    if(Radio.Init() != OK) {
 ////        Led.StartSequence(lsqFailure);
@@ -68,12 +69,7 @@ void App_t::ITask() {
 //            else Effects.AllTogetherSmoothly(clBlack, 360);
 //            flag = !flag;
 
-            switch(appState) {
-                case appsIdle: appState = appsRed; break;
-                case appsRed: appState = appsBlue; break;
-                case appsBlue: appState = appsWhite; break;
-                case appsWhite: appState = appsIdle; break;
-            }
+
 //            SetStateIndication();
         }
 
@@ -90,9 +86,9 @@ void App_t::ITask() {
 void SetStateIndication() {
     switch(appState) {
         case appsIdle: Effects.AllTogetherSmoothly(clBlack, 720); break;
-        case appsRed: Effects.SinusRun(); break;
-        case appsBlue:  break;
-        case appsWhite:  break;
+        case appsRed:   Effects.SinusRun(clRed, clBlack); break;
+        case appsBlue:  Effects.SinusRun(clBlue, clBlack); break;
+        case appsWhite: Effects.SinusRun({99,99,99}, clBlack); break;
     } // switch
 }
 
