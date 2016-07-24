@@ -9,8 +9,10 @@
 #include "board.h"
 #include "ws2812b.h"
 #include "Effects.h"
+#include "radio_lvl1.h"
 
 App_t App;
+TmrKL_t TmrEverySecond{MS2ST(99), EVT_EVERY_SECOND, tktPeriodic};
 
 int main(void) {
     // ==== Init Vcore & clock system ====
@@ -34,8 +36,16 @@ int main(void) {
 //    Effects.AllTogetherNow(clGreen);
 //    Effects.AllTogetherSmoothly(clGreen, 360);
 //    Effects.ChunkRun(clYellow, 3);
-    Effects.SinusRun();
+//    Effects.SinusRun();
 //    Effects.Flashes();
+
+//    if(Radio.Init() != OK) {
+////        Led.StartSequence(lsqFailure);
+//        chThdSleepMilliseconds(2700);
+//    }
+//    else Led.StartSequence(lsqStart);
+
+    TmrEverySecond.InitAndStart();
 
     // Main cycle
     App.ITask();
@@ -46,7 +56,8 @@ void App_t::ITask() {
     while(true) {
         __unused eventmask_t Evt = chEvtWaitAny(ALL_EVENTS);
         if(Evt & EVT_EVERY_SECOND) {
-
+            Uart.Printf("#\r");
+            Effects.AllTogetherNow(clGreen);
         }
 
 #if UART_RX_ENABLED

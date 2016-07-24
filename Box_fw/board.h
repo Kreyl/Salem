@@ -11,7 +11,7 @@
 
 // ==== General ====
 #define BOARD_NAME          "SalemBox"
-#define APP_NAME            "RGB_BAND"
+#define APP_NAME            "RockOfDalan"
 
 // MCU type as defined in the ST header.
 #define STM32L151xB
@@ -33,12 +33,26 @@
 #define UART_AF         AF7 // for USART1 @ GPIOA
 
 #define LEDWS_GPIO      GPIOB
-#define LEDWS_PIN       5
+#define LEDWS_PIN       15
+
+// Radio
+#define CC_GPIO         GPIOA
+#define CC_GDO2         NC
+#define CC_GDO0         0
+#define CC_SCK          5
+#define CC_MISO         6
+#define CC_MOSI         7
+#define CC_CS           1
+// Input pin
+#define CC_GDO0_IRQ     { CC_GPIO, CC_GDO0, pudNone }
 
 #endif // GPIO
 
 #if 1 // =========================== SPI =======================================
-#define LEDWS_SPI       SPI1
+#define LEDWS_SPI       SPI2
+#define LEDWS_SPI_AF    AF5
+#define CC_SPI          SPI1
+#define CC_SPI_AF       AF5
 #endif
 
 #if 1 // ========================== USART ======================================
@@ -48,9 +62,9 @@
 #endif
 
 #if 1 // =========================== DMA =======================================
-#define STM32_DMA_REQUIRED  TRUE
+#define STM32_DMA_REQUIRED  TRUE    // Always
 
-#define LEDWS_DMA       STM32_DMA1_STREAM3  // SPI1 TX
+#define LEDWS_DMA       STM32_DMA1_STREAM5  // SPI2 TX
 
 // ==== Uart ====
 #define UART_DMA_TX     STM32_DMA1_STREAM4

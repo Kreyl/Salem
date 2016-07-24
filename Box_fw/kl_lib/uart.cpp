@@ -166,12 +166,8 @@ static void UartRxThread(void *arg) {
 #endif
 
 // ==== Init & DMA ====
-#if UART_RX_ENABLED
 void Uart_t::Init(uint32_t ABaudrate, GPIO_TypeDef *PGpioTx, const uint16_t APinTx,
         GPIO_TypeDef *PGpioRx, const uint16_t APinRx) {
-#else
-void Uart_t::Init(uint32_t ABaudrate, GPIO_TypeDef *PGpioTx, const uint16_t APinTx) {
-#endif
     PinSetupAlterFunc(PGpioTx, APinTx, omPushPull, pudNone, UART_AF);
     IBaudrate = ABaudrate;
     // ==== USART configuration ====

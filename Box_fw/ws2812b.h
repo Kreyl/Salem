@@ -13,7 +13,7 @@
 #include "color.h"
 #include "uart.h"
 
-#define LED_CNT         75   // Number of WS2812 LEDs
+#define LED_CNT         7   // Number of WS2812 LEDs
 
 #define LED_DMA_MODE    DMA_PRIORITY_HIGH \
                         | STM32_DMA_CR_MSIZE_HWORD \
@@ -36,7 +36,6 @@
 
 class LedWs_t {
 private:
-    Spi_t ISpi {LEDWS_SPI};
     uint16_t IBuf[TOTAL_W_CNT];
     uint16_t *PBuf;
     int Indx;

@@ -15,12 +15,12 @@
 #include "board.h"
 
 // Set to true if RX needed
-#define UART_RX_ENABLED     TRUE
+#define UART_RX_ENABLED     FALSE
 
 #define UART_USE_DMA        TRUE
 
 #if UART_USE_DMA // ==== TX ====
-#define UART_TXBUF_SZ       2048
+#define UART_TXBUF_SZ       1024
 
 #define UART_DMA_TX_MODE    STM32_DMA_CR_CHSEL(UART_DMA_CHNL) | \
                             DMA_PRIORITY_LOW | \
@@ -61,11 +61,7 @@ private:
     uint8_t IRxBuf[UART_RXBUF_SZ];
 #endif
 public:
-#if UART_RX_ENABLED
     void Init(uint32_t ABaudrate, GPIO_TypeDef *PGpioTx, const uint16_t APinTx, GPIO_TypeDef *PGpioRx, const uint16_t APinRx);
-#else
-    void Init(uint32_t ABaudrate, GPIO_TypeDef *PGpioTx, const uint16_t APinTx);
-#endif
     void DeInit() {
         UART->CR1 &= ~USART_CR1_UE; // UART Disable
         if(UART == USART1) { rccDisableUSART1(FALSE); }

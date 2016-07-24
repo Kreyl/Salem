@@ -11,6 +11,8 @@
 
 LedWs_t LedWs;
 
+Spi_t ISpi {LEDWS_SPI};
+
 extern "C" {
 // Wrapper for Tx Completed IRQ
 void LedTxcIrq(void *p, uint32_t flags) {
@@ -20,7 +22,7 @@ void LedTxcIrq(void *p, uint32_t flags) {
 } // "C"
 
 void LedWs_t::Init() {
-    PinSetupAlterFunc(LEDWS_GPIO, LEDWS_PIN, omPushPull, pudNone, AF5, psHigh);
+    PinSetupAlterFunc(LEDWS_GPIO, LEDWS_PIN, omPushPull, pudNone, LEDWS_SPI_AF, psHigh);
     ISpi.Setup(boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv2, bitn16);
     ISpi.Enable();
     ISpi.EnableTxDma();
@@ -101,7 +103,7 @@ void LedWs_t::AppendOnes() {
 }
 
 void LedWs_t::ISetCurrentColors() {
-    if(chBSemWait(&BSemaphore) != MSG_OK) return;
+//    if(chBSemWait(&BSemaphore) != MSG_OK) return;
     // Fill bit buffer
     PBuf = &IBuf[RST_W_CNT];    // Do not touch first "reset" bits
     Indx = 0;
@@ -120,5 +122,5 @@ void LedWs_t::ISetCurrentColors() {
     dmaStreamSetTransactionSize(LEDWS_DMA, TOTAL_W_CNT);
     dmaStreamSetMode(LEDWS_DMA, LED_DMA_MODE);
     dmaStreamEnable(LEDWS_DMA);
-    chBSemSignal(&BSemaphore);
+//    chBSemSignal(&BSemaphore);
 }
