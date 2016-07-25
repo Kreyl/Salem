@@ -16,6 +16,9 @@
 
 #define EVT_LEDS_DONE       EVENT_MASK(6)
 
+#define EVT_RADIO           EVENT_MASK(7)
+#define EVT_CLEAR           EVENT_MASK(8)
+
 #define EVT_SAMPLING        EVENT_MASK(24)
 #define EVT_ADC_DONE        EVENT_MASK(25)
 

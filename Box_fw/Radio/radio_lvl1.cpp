@@ -74,12 +74,19 @@ void rLevel1_t::ITask() {
 //#else
 #endif
 
-        uint8_t RxRslt = CC.ReceiveSync(360, &Pkt, &Rssi);
-        if(RxRslt == OK) {
-            Uart.Printf("Rssi=%d\r", Rssi);
-//            App.SignalEvt(EVT_SOMEONE_NEAR);
+        // Listen channel after channel
+        for(uint8_t chnl=1; chnl <= 8; chnl++) {
+            CC.SetChannel(chnl);
+            uint8_t RxRslt = CC.ReceiveSync(99, &Pkt, &Rssi);
+            if(RxRslt == OK) {
+//                Uart.Printf("Ch=%u; Rssi=%d\r", chnl, Rssi);
+                if(((Pkt.ID & Pkt.CheckID) == 0) and (((Pkt.State & Pkt.CheckState) == 0))) {
+                    RxTable.AddOrReplaceExisting(Pkt);
+                }
+                else Uart.Printf("PktErr\r");
+            }
         }
-//        else Uart.Printf("#\r");
+        if(RxTable.GetCount() != 0) App.SignalEvt(EVT_RADIO);
 
 #if 0
         // Listen if nobody found, and do not if found

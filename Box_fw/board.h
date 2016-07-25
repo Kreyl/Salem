@@ -37,12 +37,12 @@
 
 // Radio
 #define CC_GPIO         GPIOA
-#define CC_GDO2         NC
-#define CC_GDO0         0
+#define CC_GDO2         2
+#define CC_GDO0         3
 #define CC_SCK          5
 #define CC_MISO         6
 #define CC_MOSI         7
-#define CC_CS           1
+#define CC_CS           4
 // Input pin
 #define CC_GDO0_IRQ     { CC_GPIO, CC_GDO0, pudNone }
 

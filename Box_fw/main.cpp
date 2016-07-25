@@ -11,12 +11,16 @@
 #include "Effects.h"
 #include "radio_lvl1.h"
 
+#define REMCTRL_ID  8   // ID of remote control
+
+enum AppState_t { appsIdle = 0, appsRed = 1, appsBlue = 2, appsWhite = 3 };
+
 App_t App;
-AppState_t appState = appsWhite;
 
-TmrKL_t TmrEverySecond{MS2ST(5400), EVT_EVERY_SECOND, tktPeriodic};
+//TmrKL_t TmrEverySecond{MS2ST(5400), EVT_EVERY_SECOND, tktPeriodic};
+TmrKL_t TmrOff{MS2ST(9000), EVT_OFF, tktOneShot};
 
-void SetStateIndication();
+void SetState(AppState_t NewState);
 
 int main(void) {
     // ==== Init Vcore & clock system ====
@@ -29,6 +33,8 @@ int main(void) {
     // Init OS
     halInit();
     chSysInit();
+    chThdSleepMilliseconds(360);    // Let power to stabilize
+
     App.InitThread();
 
     // ==== Init hardware ====
@@ -43,15 +49,33 @@ int main(void) {
 //    Effects.SinusRun(clBlue, clBlack);
 //    Effects.Flashes();
 
-    SetStateIndication();
+    // Init radio
+    bool RadioIsOk = false;
+    for(int i=0; (i<7 and !RadioIsOk); i++) {
+        if(Radio.Init() == OK) RadioIsOk = true;
+    }
+    if(RadioIsOk) {
+        Effects.AllTogetherSmoothly(clGreen, 180);
+        chThdSleepMilliseconds(900);
+        Effects.AllTogetherSmoothly(clBlack, 180);
+    }
+    else {
+        Effects.AllTogetherNow(clRed);
+        chThdSleepMilliseconds(180);
+        Effects.AllTogetherNow(clBlack);
+        chThdSleepMilliseconds(180);
+        Effects.AllTogetherNow(clRed);
+        chThdSleepMilliseconds(180);
+        Effects.AllTogetherNow(clBlack);
+        chThdSleepMilliseconds(180);
+        Effects.AllTogetherNow(clRed);
+        chThdSleepMilliseconds(180);
+        Effects.AllTogetherNow(clBlack);
+    }
 
-//    if(Radio.Init() != OK) {
-////        Led.StartSequence(lsqFailure);
-//        chThdSleepMilliseconds(2700);
-//    }
-//    else Led.StartSequence(lsqStart);
-
-    TmrEverySecond.InitAndStart();
+    // Timers
+//    TmrEverySecond.InitAndStart();
+    TmrOff.Init();
 
     // Main cycle
     App.ITask();
@@ -59,18 +83,51 @@ int main(void) {
 
 __noreturn
 void App_t::ITask() {
-//    bool flag = false;
+    int RadioCounter = 0;
     while(true) {
         __unused eventmask_t Evt = chEvtWaitAny(ALL_EVENTS);
-        if(Evt & EVT_EVERY_SECOND) {
-//            Uart.Printf("#\r");
 
-//            if(flag) Effects.AllTogetherSmoothly(clGreen, 360);
-//            else Effects.AllTogetherSmoothly(clBlack, 360);
-//            flag = !flag;
+        if(Evt & EVT_RADIO) {
+            TmrOff.Restart();
+            // Accumulate data for some time
+            RadioCounter++;
+            if(RadioCounter >= 4) {
+                RadioCounter = 0;
+                Radio.RxTable.Print();
+                // Check if RemCtrl presents
+                rPkt_t *ptr = nullptr;
+                if(Radio.RxTable.GetPktByID(REMCTRL_ID, &ptr) == OK) {
+                    Uart.Printf("Remote: %u\r", ptr->State);
+                    SetState((AppState_t)ptr->State);
+                }
+                // No Remote Control, proceed with others
+                else {
+                    uint32_t Cnt = Radio.RxTable.GetCount();
+                    if(Cnt == 1 or Cnt == 2) SetState(appsWhite);
+                    else if(Cnt == 3) SetState(appsRed);
+                    else { // 4 or more
+                        // Check if 0123 or 4567 present
+                        if(
+                               (Radio.RxTable.IDPresents(0) and
+                                Radio.RxTable.IDPresents(1) and
+                                Radio.RxTable.IDPresents(2) and
+                                Radio.RxTable.IDPresents(3))
+                                or
+                               (Radio.RxTable.IDPresents(4) and
+                                Radio.RxTable.IDPresents(5) and
+                                Radio.RxTable.IDPresents(6) and
+                                Radio.RxTable.IDPresents(7))
+                           ) SetState(appsBlue);
+                        else SetState(appsWhite);   // not present
+                    }
+                } // No rem ctrl
+                Radio.RxTable.Clear();
+            } // If RadioCounter
+        } // Evt
 
-
-//            SetStateIndication();
+        if(Evt & EVT_OFF) {
+            Uart.Printf("Off\r");
+            SetState(appsIdle);
         }
 
 #if UART_RX_ENABLED
@@ -83,13 +140,17 @@ void App_t::ITask() {
     } // while true
 }
 
-void SetStateIndication() {
-    switch(appState) {
-        case appsIdle: Effects.AllTogetherSmoothly(clBlack, 720); break;
-        case appsRed:   Effects.SinusRun(clRed, clBlack); break;
-        case appsBlue:  Effects.SinusRun(clBlue, clBlack); break;
-        case appsWhite: Effects.SinusRun({99,99,99}, clBlack); break;
-    } // switch
+void SetState(AppState_t NewState) {
+    static AppState_t OldState = appsIdle;
+    if(OldState != NewState) {
+        OldState = NewState;
+        switch(NewState) {
+            case appsIdle: Effects.AllTogetherSmoothly(clBlack, 360); break;
+            case appsRed:   Effects.SinusRun(clRed, clBlack); break;
+            case appsBlue:  Effects.SinusRun(clBlue, clBlack); break;
+            case appsWhite: Effects.SinusRun({99,99,99}, clBlack); break;
+        } // switch
+    }
 }
 
 
