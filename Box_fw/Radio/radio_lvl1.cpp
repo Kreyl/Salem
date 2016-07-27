@@ -75,7 +75,7 @@ void rLevel1_t::ITask() {
 #endif
 
         // Listen channel after channel
-        for(uint8_t chnl=1; chnl <= 8; chnl++) {
+        for(uint8_t chnl=0; chnl <= 8; chnl++) {
             CC.SetChannel(chnl);
             uint8_t RxRslt = CC.ReceiveSync(99, &Pkt, &Rssi);
             if(RxRslt == OK) {

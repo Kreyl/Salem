@@ -14,6 +14,7 @@
 #define REMCTRL_ID  8   // ID of remote control
 
 enum AppState_t { appsIdle = 0, appsRed = 1, appsBlue = 2, appsWhite = 3 };
+AppState_t CurrentState = appsIdle;
 
 App_t App;
 
@@ -91,17 +92,17 @@ void App_t::ITask() {
             TmrOff.Restart();
             // Accumulate data for some time
             RadioCounter++;
-            if(RadioCounter >= 4) {
+            if(RadioCounter >= 7) {
                 RadioCounter = 0;
-                Radio.RxTable.Print();
-                // Check if RemCtrl presents
+//                Radio.RxTable.Print();
+                // ==== Check if RemCtrl presents ====
                 rPkt_t *ptr = nullptr;
                 if(Radio.RxTable.GetPktByID(REMCTRL_ID, &ptr) == OK) {
                     Uart.Printf("Remote: %u\r", ptr->State);
                     SetState((AppState_t)ptr->State);
                 }
-                // No Remote Control, proceed with others
-                else {
+                // ==== No Remote Control, proceed with others ====
+                else if(CurrentState == appsIdle) { // Do not change state once set
                     uint32_t Cnt = Radio.RxTable.GetCount();
                     if(Cnt == 1 or Cnt == 2) SetState(appsWhite);
                     else if(Cnt == 3) SetState(appsRed);
@@ -119,7 +120,7 @@ void App_t::ITask() {
                                 Radio.RxTable.IDPresents(7))
                            ) SetState(appsBlue);
                         else SetState(appsWhite);   // not present
-                    }
+                    } // 4 or more
                 } // No rem ctrl
                 Radio.RxTable.Clear();
             } // If RadioCounter
@@ -127,6 +128,7 @@ void App_t::ITask() {
 
         if(Evt & EVT_OFF) {
             Uart.Printf("Off\r");
+            RadioCounter = 0; // Reset counter to start from scratch
             SetState(appsIdle);
         }
 
@@ -141,16 +143,15 @@ void App_t::ITask() {
 }
 
 void SetState(AppState_t NewState) {
-    static AppState_t OldState = appsIdle;
-    if(OldState != NewState) {
-        OldState = NewState;
+    if(CurrentState != NewState) {
+        CurrentState = NewState;
         switch(NewState) {
             case appsIdle: Effects.AllTogetherSmoothly(clBlack, 360); break;
             case appsRed:   Effects.SinusRun(clRed, clBlack); break;
             case appsBlue:  Effects.SinusRun(clBlue, clBlack); break;
             case appsWhite: Effects.SinusRun({99,99,99}, clBlack); break;
         } // switch
-    }
+    } // if(CurrentState != NewState)
 }
 
 
