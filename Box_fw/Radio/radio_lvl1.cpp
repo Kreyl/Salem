@@ -104,7 +104,7 @@ void rLevel1_t::Init() {
     }
     else {
         Uart.Printf("\rCC init error");
-        Interface.Error("  Radio Failure ");
+//        Interface.Error("  Radio Failure ");
     }
 }
 #endif

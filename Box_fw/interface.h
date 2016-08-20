@@ -17,7 +17,7 @@ public:
         Lcd.Printf(11, 0, VERSION_STRING);
 //        Lcd.Printf(9, 1, "Active");
 //        Lcd.Printf(8, 2, "duration");
-        Lcd.Printf(0, 0, "Test");
+//        Lcd.Printf(0, 0, "Test");
         Lcd.Symbols(0, 5, LineHorizDouble, 16, 0);
 //        for(int i=0; i<5; i++) Lcd.Symbols(6, i, ((i == 2)? LineVertDoubleLeft : LineVertDouble), 1,0);
 //        Lcd.Symbols(0, 2, LineHorizDouble, 6, 0);
