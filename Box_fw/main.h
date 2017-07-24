@@ -15,16 +15,14 @@
 #include "evt_mask.h"
 #include "uart.h"
 
-#define VERSION_STRING  "v1.4"
+#define VERSION_STRING  "v0.1"
+
+enum SetupState_t { setstNotSent, setstSending, setstAccepted};
+extern SetupState_t SetupState;
 
 // All values must be 32bit to make things easier
 struct Settings_t {
-    uint32_t ID;
-    uint32_t DurationActive_s;
-    union {
-        uint32_t dummy32;   // force bool being 32-bit
-        bool DeadtimeEnabled;
-    };
+    uint32_t Percent;
 };
 #define SETTINGS_SZ32   (sizeof(Settings_t) / 4)
 // EEPROM addresses
@@ -32,20 +30,12 @@ struct Settings_t {
 #define EE_PTR      (reinterpret_cast<Settings_t*>(EEPROM_BASE_ADDR + EE_ADDR))
 
 // ==== Constants and default values ====
-#define DURATION_ACTIVE_MIN_S   10
-#define DURATION_ACTIVE_MAX_S   9990
-#define DURATION_ACTIVE_DEFAULT 300
-#define ID_MIN                  1
-#define ID_MAX                  15
-#define ID_DEFAULT              ID_MIN
-#define DURATION_DEADTIME_S     90
-
-// Radio timing
-#define RADIO_NOPKT_TIMEOUT_S   2
+#define Percent_MIN             0
+#define Percent_MAX             100
+#define Percent_DEFAULT         100
 
 class App_t {
 private:
-    bool RadioIsOn, LedBySnsMustBeOn, DeadTimeIsNow;
     VirtualTimer ITmrSaving, ITmrMSnsTimeout, ITmrRadioTimeout, ITmrBacklight, ITmrDeadTime;
     void ISaveSettingsReally();    // Really save settings
     Thread *PThread;
@@ -64,9 +54,6 @@ public:
     void SignalEvtI(eventmask_t Evt) { chEvtSignalI(PThread, Evt); }
     // Inner use
     void ITask();
-    App_t(): RadioIsOn(false), LedBySnsMustBeOn(false), DeadTimeIsNow(false),
-            PThread(nullptr), SettingsHasChanged(false),
-            Settings({ID_MIN, DURATION_ACTIVE_MIN_S, false}) {}
     friend class Interface_t;
 };
 

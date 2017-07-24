@@ -32,59 +32,34 @@ static void rLvl1Thread(void *arg) {
 
 __attribute__((__noreturn__)) void rLevel1_t::ITask() {
     while(true) {
-#if 0 // ======== TX cycle ========
-        switch(App.Type) {
-            case dtLustraClean:
-            case dtLustraWeak:
-            case dtLustraStrong:
-            case dtLustraLethal:
-                // Setup channel, do nothing if bad ID
-                if((App.ID >= LUSTRA_MIN_ID) and (App.ID <= LUSTRA_MAX_ID)) {
-                    CC.SetChannel(LUSTRA_ID_TO_RCHNL(App.ID));
-                    // Transmit corresponding pkt
-                    uint8_t Indx = App.Type - dtLustraClean;
-                    CC.TransmitSync((void*)&PktLustra[Indx]);
+        if(SetupState == setstNotSent) {
+            SetupState = setstSending;
+            Interface.ShowSetupState();
+            // Send setup data
+            for(int i=0; i<7; i++) {
+                Pkt.Percent = App.Settings.Percent;
+                Pkt.TestWord = TEST_WORD;
+                CC.TransmitSync((void*)&Pkt);
+                // Receive reply
+                uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &LastRssidB);
+                if(RxRslt == OK and Pkt.TestWord == TEST_WORD) {
+                    SetupState = setstAccepted;
+                    Interface.ShowSetupState();
+                    break;
                 }
-                else {
-                    Indication.LustraBadID();
-                    chThdSleepMilliseconds(999);
-                    continue;
-                }
-                break;
-
-            case dtPelengator:
-                CC.SetChannel(RCHNL_PELENG);
-                for(uint8_t i=0; i<PELENG_TX_CNT; i++) CC.TransmitSync((void*)&PktDummy);
-                break;
-
-            case dtEmpGrenade:
-                if(App.Grenade.State == gsRadiating) {
-                    CC.SetChannel(RCHNL_EMP);
-                    CC.TransmitSync((void*)&PktDummy);
-                }
-                else {
-                    CC.Sleep();
-                    chThdSleepMilliseconds(450);
-                }
-                break;
-
-            default: break;
-        } // switch
-#endif
-
-#if 1 // ============ RX cycle ============
-        uint8_t RxRslt;
-        CC.SetChannel(ID2RCHNL(App.Settings.ID));
-        RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &LastRssidB);
-        if(RxRslt == OK) {
-//            Uart.Printf("\rRx ID=%u; TestWord=%X", Pkt.ID, Pkt.TestWord);
-            if(Pkt.TestWord == TEST_WORD and Pkt.ID == App.Settings.ID) {
-                App.SignalEvt(EVTMSK_RADIO_RX);
-            } // if test word
-        } // if OK
-        CC.EnterPwrDown();
-        chThdSleepMilliseconds(RX_SLEEP_T_MS);
-#endif // RX
+                else chThdSleepMilliseconds(45);
+            } // for
+            if(SetupState != setstAccepted) {   // Transmission failed
+                SetupState = setstNotSent;
+                Interface.ShowSetupState();
+                CC.EnterPwrDown();
+                chThdSleepMilliseconds(1800);
+            }
+        } // if not sent
+        else {
+            CC.EnterPwrDown();
+            chThdSleepMilliseconds(360);
+        }
     } // while true
 }
 #endif // task
@@ -95,6 +70,7 @@ void rLevel1_t::Init() {
     if(CC.Init() == OK) {
         CC.SetTxPower(CC_Pwr0dBm);
         CC.SetPktSize(RPKT_LEN);
+        CC.SetChannel(7);
         // Thread
         chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
 #ifdef DBG_PINS

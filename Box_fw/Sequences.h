@@ -243,7 +243,7 @@ const LedSmoothChunk_t lsqEnterIdle[] = {
 #endif
 
 #if 1 // ============================= Beeper ==================================
-#define BEEP_VOLUME     2
+#define BEEP_VOLUME     1
 
 // Type, duration_ms, freq, volume
 const BeepChunk_t bsqButton[] = {

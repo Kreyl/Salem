@@ -17,8 +17,8 @@
 
 App_t App;
 Beeper_t Beeper;
-LedSmooth_t Led({GPIOB, 4, TIM3, 1});
 Interface_t Interface;
+SetupState_t SetupState;
 
 // Universal VirtualTimer one-shot callback
 void TmrOneShotCallback(void *p) {
@@ -38,7 +38,7 @@ int main(void) {
 
     // ==== Init Hard & Soft ====
     Uart.Init(115200);
-    Uart.Printf("\rSalemBox %S AHB=%u", VERSION_STRING, Clk.AHBFreqHz);
+    Uart.Printf("\rStarPath %S AHB=%u\r", VERSION_STRING, Clk.AHBFreqHz);
 
     App.InitThread();
 
@@ -46,11 +46,15 @@ int main(void) {
     App.LoadSettings();
     Interface.Reset();
 
+    // Display "Not sent"
+    SetupState = setstNotSent;
+    Interface.ShowSetupState();
+    SetupState = setstAccepted; // Do not start transmission immideately
+
     PinSensors.Init();
     Beeper.Init();
     Beeper.StartSequence(bsqBeepBeep);
 
-    Led.Init();
     Radio.Init();
 
     // Main cycle
@@ -72,100 +76,24 @@ void App_t::ITask() {
                 chVTRestart(&ITmrBacklight, MS2ST(4500), EVTMSK_BCKLT_OFF);
                 // Process buttons
                 switch(EInfo.BtnID[0]) {
-                    case btnLTop:   // Iterate IDs
-                        if(Settings.ID < ID_MAX) Settings.ID++;
-                        else Settings.ID = ID_MIN;
+                    case btnLTop:   // Increase percent
+                        if(Settings.Percent < Percent_MAX) Settings.Percent++;
                         SettingsHasChanged = true;
                         SaveSettings();
-                        Interface.ShowID();
+                        Interface.ShowPercent();
                         break;
 
                     case btnLBottom: // Deadtime on/off
-                        Settings.DeadtimeEnabled = !Settings.DeadtimeEnabled;
+                        if(Settings.Percent > 0) Settings.Percent--;
                         SettingsHasChanged = true;
                         SaveSettings();
-                        Interface.ShowDeadtimeSettings();
-                        break;
-
-                    case btnRTop:
-                        if(Settings.DurationActive_s < DURATION_ACTIVE_MAX_S) {
-                            Settings.DurationActive_s += 10;
-                            SettingsHasChanged = true;
-                            SaveSettings();
-                            Interface.ShowDurationActive();
-                        }
-                        break;
-
-                    case btnRBottom:
-                        if(Settings.DurationActive_s > DURATION_ACTIVE_MIN_S) {
-                            Settings.DurationActive_s -= 10;
-                            SettingsHasChanged = true;
-                            SaveSettings();
-                            Interface.ShowDurationActive();
-                        }
+                        Interface.ShowPercent();
                         break;
 
                     default: break;
                 } // switch
             } // while get
         } // if buttons
-#endif
-
-#if 1 // ==== Motion sensors ====
-        // Sensors on, enter Active State now
-        if(EvtMsk & EVTMSK_MSNS_ON) {
-            Uart.Printf("\rMSns on");
-            LedBySnsMustBeOn = true;
-            chVTReset(&ITmrMSnsTimeout);
-            IProcessLedLogic();
-        }
-        // Sensors off, wait DurationActive_s before entering Idle State
-        if(EvtMsk & EVTMSK_MSNS_OFF) {
-            Uart.Printf("\rMSns off");
-            // Restart ReturnToIdle timer
-            chVTRestart(&ITmrMSnsTimeout, S2ST(Settings.DurationActive_s), EVTMSK_MSNS_AFTEROFF_TIMEOUT);
-        }
-        // Timeout after Msns off: sensors were off some time ago
-        if(EvtMsk & EVTMSK_MSNS_AFTEROFF_TIMEOUT) {
-            Uart.Printf("\rMSns afteroff delay end");
-            LedBySnsMustBeOn = false;
-            // Start DeadTime delay after sensors off
-            if(Settings.DeadtimeEnabled) {
-                Uart.Printf("\rDeadTime started");
-                DeadTimeIsNow = true;
-                Interface.ShowDeadtime();
-                chVTRestart(&ITmrDeadTime, S2ST(DURATION_DEADTIME_S), EVTMSK_DEADTIME_END);
-            }
-            IProcessLedLogic();
-        }
-#endif
-
-#if 1 // ==== Radio ====
-        if(EvtMsk & EVTMSK_RADIO_RX) {
-            Uart.Printf("\rRadioRx %d", Radio.LastRssidB);
-            RadioIsOn = true;
-            Interface.ShowRadio();
-            chVTRestart(&ITmrRadioTimeout, S2ST(RADIO_NOPKT_TIMEOUT_S), EVTMSK_RADIO_ON_TIMEOUT);
-            IProcessLedLogic();
-            // Radio RX disables Deadtime if it is on
-            DeadTimeIsNow = false;
-            chVTReset(&ITmrDeadTime);
-        }
-        if(EvtMsk & EVTMSK_RADIO_ON_TIMEOUT) {
-//            Uart.Printf("\rRadioTimeout");
-            RadioIsOn = false;
-            Interface.ShowRadio();
-            IProcessLedLogic();
-        }
-#endif
-
-#if 1 // ==== DeadTime ====
-        if(EvtMsk & EVTMSK_DEADTIME_END) {
-            Uart.Printf("\rDeadTime ended");
-            DeadTimeIsNow = false;
-            Interface.ShowDeadtime();
-            IProcessLedLogic();
-        }
 #endif
 
 #if 1 // ==== Saving settings ====
@@ -178,35 +106,15 @@ void App_t::ITask() {
     } // while true
 }
 
-void App_t::IProcessLedLogic() {
-    if(LedBySnsMustBeOn and !RadioIsOn and !DeadTimeIsNow) {
-        Led.StartSequence(lsqEnterActive);
-        Interface.ShowLedOn();
-    }
-    else {
-        Led.StartSequence(lsqEnterIdle);
-        Interface.ShowLedOff();
-    }
-}
-
 #if 1 // ===================== Load/save settings ==============================
 void App_t::LoadSettings() {
-    if(EE_PTR->ID < ID_MIN or EE_PTR->ID > ID_MAX) Settings.ID = ID_DEFAULT;
-    else Settings.ID = EE_PTR->ID;
-
-    if(EE_PTR->DurationActive_s < DURATION_ACTIVE_MIN_S or
-       EE_PTR->DurationActive_s > DURATION_ACTIVE_MAX_S
-       ) {
-        Settings.DurationActive_s = DURATION_ACTIVE_DEFAULT;
-    }
-    else Settings.DurationActive_s = EE_PTR->DurationActive_s;
-
-    Settings.DeadtimeEnabled = EE_PTR->DeadtimeEnabled;
-
+    if(EE_PTR->Percent < Percent_MIN or EE_PTR->Percent > Percent_MAX) Settings.Percent = Percent_DEFAULT;
+    else Settings.Percent = EE_PTR->Percent;
     SettingsHasChanged = false;
 }
 
 void App_t::ISaveSettingsReally() {
+    // Save settings to EE
     Flash_t::UnlockEE();
     chSysLock();
     uint8_t r = OK;
@@ -222,13 +130,13 @@ void App_t::ISaveSettingsReally() {
     if(r == OK) {
         Uart.Printf("\rSettings saved");
         SettingsHasChanged = false;
-        Interface.ShowID();
-        Interface.ShowDurationActive();
-        Interface.ShowDeadtimeSettings();
+        Interface.ShowPercent();
     }
     else {
         Uart.Printf("\rSettings saving failure");
         Interface.Error("Save failure");
     }
+    // Send new settings
+    SetupState = setstNotSent;
 }
 #endif

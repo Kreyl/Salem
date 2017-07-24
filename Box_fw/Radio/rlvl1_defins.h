@@ -51,7 +51,7 @@ static inline void Lvl250ToLvl1000(uint16_t *PLvl) {
 
 #if 1 // =========================== Pkt_t =====================================
 struct rPkt_t {
-    uint8_t ID;
+    uint8_t Percent;
     uint32_t TestWord;
 } __attribute__ ((__packed__));
 #define RPKT_LEN    sizeof(rPkt_t)
@@ -71,7 +71,7 @@ struct rPkt_t {
 #endif
 
 #if 1 // =========================== Timings ===================================
-#define RX_T_MS         27
+#define RX_T_MS         54
 #define RX_SLEEP_T_MS   360
 
 #endif

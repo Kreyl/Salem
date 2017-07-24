@@ -42,25 +42,6 @@ struct PinSns_t {
 // Buttons handler
 extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);
 
-// Motion sensors handler
-static void ProcessMSensors(PinSnsState_t *PState, uint32_t Len) {
-    // Display status
-    if(PState[0] == pssRising) Interface.ShowMSns1(1);
-    else if(PState[0] == pssFalling) Interface.ShowMSns1(0);
-    if(PState[1] == pssRising) Interface.ShowMSns2(1);
-    else if(PState[1] == pssFalling) Interface.ShowMSns2(0);
-
-    // Send ON evt if any is rising
-    if(PState[0] == pssRising or PState[1] == pssRising) App.SignalEvt(EVTMSK_MSNS_ON);
-    // Send OFF evt if one is falling and other is low
-    else if((PState[0] == pssFalling and PState[1] == pssLo) or
-            (PState[0] == pssLo      and PState[1] == pssFalling) or
-            (PState[0] == pssFalling and PState[1] == pssFalling)
-            ) {
-        App.SignalEvt(EVTMSK_MSNS_OFF);
-    }
-}
-
 #define BUTTONS_CNT     4   // Setup appropriately. Required for buttons handler
 
 const PinSns_t PinSns[] = {
@@ -69,9 +50,6 @@ const PinSns_t PinSns[] = {
         {GPIOA, 15, pudPullUp, ProcessButtons},
         {GPIOB,  6, pudPullUp, ProcessButtons},
         {GPIOB, 15, pudPullUp, ProcessButtons},
-        // Motion sensors
-        {GPIOB,  2, pudPullDown, ProcessMSensors},
-        {GPIOB,  5, pudPullDown, ProcessMSensors},
 };
 #define PIN_SNS_CNT     countof(PinSns)
 
