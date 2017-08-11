@@ -21,7 +21,10 @@ public:
     }
     // Settings
     void ShowPercent() {
-        if(App.SettingsHasChanged) Lcd.Printf(0, 3, "%u%%* ", App.Settings.Percent);
+        if(App.SettingsHasChanged) {
+            Lcd.Printf(0, 3, "%u%%* ", App.Settings.Percent);
+            Lcd.Printf(0, 7, "Not Sent  "); // Remove accepted
+        }
         else Lcd.Printf(0, 3, "%u%% ", App.Settings.Percent);
     }
     void ShowSetupState() {

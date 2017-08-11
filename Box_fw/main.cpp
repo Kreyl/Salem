@@ -73,21 +73,43 @@ void App_t::ITask() {
                 Beeper.StartSequence(bsqButton);
                 // Switch backlight on
                 Lcd.Backlight(81);
-                chVTRestart(&ITmrBacklight, MS2ST(4500), EVTMSK_BCKLT_OFF);
                 // Process buttons
                 switch(EInfo.BtnID[0]) {
                     case btnLTop:   // Increase percent
-                        if(Settings.Percent < Percent_MAX) Settings.Percent++;
+                        chVTRestart(&ITmrBacklight, MS2ST(4500), EVTMSK_BCKLT_OFF);
+                        if(EInfo.Type == bePress) {
+                            if(Settings.Percent < Percent_MAX) Settings.Percent++;
+                        }
+                        else if(EInfo.Type == beRepeat) {
+                            if(Settings.Percent < (Percent_MAX-4)) Settings.Percent += 5;
+                            else Settings.Percent = Percent_MAX;
+                        }
                         SettingsHasChanged = true;
                         SaveSettings();
                         Interface.ShowPercent();
                         break;
 
                     case btnLBottom: // Deadtime on/off
-                        if(Settings.Percent > 0) Settings.Percent--;
+                        chVTRestart(&ITmrBacklight, MS2ST(4500), EVTMSK_BCKLT_OFF);
+                        if(EInfo.Type == bePress) {
+                            if(Settings.Percent > 0) Settings.Percent--;
+                        }
+                        else if(EInfo.Type == beRepeat) {
+                            if(Settings.Percent > 4) Settings.Percent -= 5;
+                            else Settings.Percent = 0;
+                        }
                         SettingsHasChanged = true;
                         SaveSettings();
                         Interface.ShowPercent();
+                        break;
+
+                    case btnRBottom:    // Send now
+                        if(SettingsHasChanged) {
+                            chVTReset(&ITmrBacklight);
+                            SettingsHasChanged = false;
+                            Interface.ShowPercent();
+                            ISaveSettingsReally();
+                        }
                         break;
 
                     default: break;

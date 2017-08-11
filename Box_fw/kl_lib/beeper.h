@@ -11,7 +11,7 @@
 #include "ChunkTypes.h"
 #include "kl_lib.h"
 
-#define BEEP_TOP_VALUE   45
+#define BEEP_TOP_VALUE   54
 
 class Beeper_t : public BaseSequencer_t<BeepChunk_t> {
 private:

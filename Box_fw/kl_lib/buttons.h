@@ -21,8 +21,8 @@
 #define BTN_REPEAT      TRUE    // Send Repeat evt
 #define BTN_COMBO       FALSE   // Allow combo
 
-#define BTN_REPEAT_PERIOD_MS        180
-#define BTN_LONGPRESS_DELAY_MS      603
+#define BTN_REPEAT_PERIOD_MS        306
+#define BTN_LONGPRESS_DELAY_MS      504
 #define BTN_DELAY_BEFORE_REPEAT_MS  (BTN_REPEAT_PERIOD_MS + BTN_LONGPRESS_DELAY_MS)
 
 #if BTN_COMBO
