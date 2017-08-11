@@ -23,18 +23,21 @@ public:
     void ShowPercent() {
         if(App.SettingsHasChanged) {
             Lcd.Printf(0, 3, "%u%%* ", App.Settings.Percent);
-            Lcd.Printf(0, 7, "Not Sent  "); // Remove accepted
+            Lcd.Printf(0, 6, "Not Sent  "); // Remove accepted
+            HideRfPwr();
         }
         else Lcd.Printf(0, 3, "%u%% ", App.Settings.Percent);
     }
     void ShowSetupState() {
         switch(SetupState) {
-            case setstNotSent:  Lcd.Printf(0, 7, "Not Sent  "); break;
-            case setstSending:  Lcd.Printf(0, 7, "Sending..."); break;
-            case setstAccepted: Lcd.Printf(0, 7, "Accepted  "); break;
+            case setstNotSent:  Lcd.Printf(0, 6, "Not Sent  "); break;
+            case setstSending:  Lcd.Printf(0, 6, "Sending..."); break;
+            case setstAccepted: Lcd.Printf(0, 6, "Accepted  "); break;
         }
-//        if(App.RadioIsOn) Lcd.PrintfInverted(0, 7, "Radio"); else Lcd.Printf(0, 7, "Radio");
     }
+
+    void HideRfPwr()           { Lcd.Printf(4, 7, "       "); }
+    void ShowRfPwr(int8_t Pwr) { Lcd.Printf(4, 7, "%d   ", Pwr); }
 
     void Error(const char* msg) { Lcd.PrintfInverted(0, 2, "%S", msg); }
 };

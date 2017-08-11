@@ -45,6 +45,7 @@ __attribute__((__noreturn__)) void rLevel1_t::ITask() {
                 if(RxRslt == OK and Pkt.TestWord == TEST_WORD) {
                     SetupState = setstAccepted;
                     Interface.ShowSetupState();
+                    Interface.ShowRfPwr(LastRssidB);
                     break;
                 }
                 else chThdSleepMilliseconds(45);
