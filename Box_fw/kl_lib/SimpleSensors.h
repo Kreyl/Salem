@@ -5,33 +5,32 @@
  *      Author: Kreyl
  */
 
-#ifndef KL_LIB_SIMPLESENSORS_H_
-#define KL_LIB_SIMPLESENSORS_H_
+#pragma once
 
 /*
  * Simple sensors are sensors with two logic states: Low and High.
- * Every time state changes (edge occures) new event generated.
- * Single event generated per pin change.
  */
 
 #include "hal.h"
-#ifdef STM32F2XX
-#include "kl_lib_f2xx.h"
-#elif defined STM32L1XX_MD || defined STM32L1XX_HD
 #include "kl_lib.h"
-#endif
-#include <PinSnsSettings.h>
 
-class SimpleSensors_t {
-private:
-    PinSnsState_t States[PIN_SNS_CNT];
-public:
-    void Init();
-    void Shutdown() { for(uint32_t i=0; i<PIN_SNS_CNT; i++) PinSns[i].Off(); }
-    // Inner use
-    void ITask();
+enum PinSnsState_t {pssNone, pssLo, pssHi, pssRising, pssFalling};
+typedef void (*ftVoidPSnsStLen)(PinSnsState_t *PState, uint32_t Len);
+
+// Single pin setup data
+struct PinSns_t {
+    GPIO_TypeDef *PGpio;
+    uint16_t Pin;
+    PinPullUpDown_t Pud;
+    ftVoidPSnsStLen Postprocessor;
+    void Init() const { PinSetupInput(PGpio, Pin, Pud); }
+    void Off()  const { PinSetupAnalog(PGpio, Pin);  }
+    bool IsHi() const { return PinIsHi(PGpio, Pin); }
+    PinSns_t(GPIO_TypeDef *APGpio, uint16_t APin, PinPullUpDown_t APud, ftVoidPSnsStLen APostprocessor) :
+        PGpio(APGpio), Pin(APin), Pud(APud), Postprocessor(APostprocessor) {}
 };
 
-extern SimpleSensors_t PinSensors;
-
-#endif /* KL_LIB_SIMPLESENSORS_H_ */
+namespace SimpleSensors {
+    void Init();
+    void Shutdown();
+};
