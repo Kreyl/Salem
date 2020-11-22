@@ -35,6 +35,9 @@
 #define UART_TX_PIN     9
 #define UART_RX_PIN     10
 
+// Radio: SPI, PGpio, Sck, Miso, Mosi, Cs, Gdo0
+#define CC_Setup0       SPI1, GPIOA, 5,6,7, GPIOA,4, GPIOA,3
+
 #endif // GPIO
 
 #if ADC_REQUIRED // ======================= Inner ADC ==========================

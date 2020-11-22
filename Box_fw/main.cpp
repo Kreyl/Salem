@@ -6,6 +6,7 @@
 #include "SimpleSensors.h"
 #include "color.h"
 #include "uart.h"
+#include "radio_lvl1.h"
 
 #if 1 // ======================== Variables and defines ========================
 // Forever
@@ -16,21 +17,16 @@ static void ITask();
 static void OnCmd(Shell_t *PShell);
 
 // LED band
-uint32_t OnDurationMin = 36, OnDurationMax = 207, OffDurationMin = 306, OffDurationMax = 2007;
-PinOutput_t LedBand{GPIOB, 0, omPushPull};
-TmrKL_t TmrBandOn{evtIdBandOff, tktOneShot};
-TmrKL_t TmrBandOff{evtIdBandOn, tktOneShot};
-TmrKL_t TmrBandOffDelay{evtIdBandOffDelay, tktOneShot};
-
-bool MustShine = true;
-
-// Inputs
-PinInput_t Sns1{GPIOB, 2, pudPullDown};
-PinInput_t Sns2{GPIOB, 5, pudPullDown};
+//PinOutput_t LedBand{GPIOB, 0, omPushPull};
+PinOutputPWM_t LedBand{GPIOB, 0, TIM3, 3, invNotInverted, omPushPull, 4094};
 #endif
 
 int main(void) {
-    SetupVCore(vcore1V5);
+    SetupVCore(vcore1V8);
+    if(Clk.EnableHSI() == retvOk) {
+        Clk.SetupFlashLatency(16);
+        Clk.SwitchToHSI();
+    }
     Clk.UpdateFreqValues();
 #if 1 // ==== Init OS and UART ====
     halInit();
@@ -42,11 +38,10 @@ int main(void) {
 #endif
 
     LedBand.Init();
-    TmrBandOff.StartOrRestart(TIME_MS2I(45));
-    TmrBandOffDelay.StartOrRestart(TIME_MS2I(5400));
 
-    Sns1.Init();
-    Sns2.Init();
+    if(Radio.Init() == retvOk) {
+        LedBand.Set(99);
+    }
 
     // Main cycle
     ITask();
@@ -94,22 +89,8 @@ void ITask() {
 #endif
 //            case evtIdEverySecond: Adc.StartMeasurement(); break;
 
-            case evtIdBandOn:
-                Printf("Sns: %u %u\r", Sns1.IsHi(), Sns2.IsHi());
-                if(Sns1.IsHi() or Sns2.IsHi()) {
-                    TmrBandOffDelay.StartOrRestart(TIME_MS2I(5400));
-                    MustShine = true;
-                }
-                if(MustShine) LedBand.SetHi();
-                TmrBandOn.StartOrRestart(TIME_MS2I(Random::Generate(OnDurationMin, OnDurationMax)));
-                break;
-            case evtIdBandOff:
-                LedBand.SetLo();
-                TmrBandOff.StartOrRestart(TIME_MS2I(Random::Generate(OffDurationMin, OffDurationMax)));
-                break;
-            case evtIdBandOffDelay:
-                MustShine = false;
-                Printf("OffDelay\r");
+            case evtIdRadioCmd:
+
                 break;
 
             case evtIdShellCmd:
@@ -132,13 +113,6 @@ void OnCmd(Shell_t *PShell) {
     }
     else if(PCmd->NameIs("Version")) PShell->Print("%S %S\r", APP_NAME, XSTRINGIFY(BUILD_TIME));
 
-    else if(PCmd->NameIs("Set")) {
-        if(     PCmd->GetNext<uint32_t>(&OnDurationMin) == retvOk and
-                PCmd->GetNext<uint32_t>(&OnDurationMax) == retvOk and
-                PCmd->GetNext<uint32_t>(&OffDurationMin) == retvOk and
-                PCmd->GetNext<uint32_t>(&OffDurationMax) == retvOk) PShell->Ok();
-        else PShell->BadParam();
-    }
 
     else PShell->CmdUnknown();
 }

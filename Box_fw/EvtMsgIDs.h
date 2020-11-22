@@ -17,7 +17,5 @@ enum EvtMsgId_t {
 
     // Not eternal
     evtIdButtons,
-    evtIdBandOn,
-    evtIdBandOff,
-    evtIdBandOffDelay,
+    evtIdRadioCmd,
 };
